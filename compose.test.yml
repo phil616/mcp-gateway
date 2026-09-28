@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: gateway
+      POSTGRES_PASSWORD: test-only-password
+      POSTGRES_DB: gateway
+    ports: ['127.0.0.1:${TEST_PG_PORT}:5432']
+    tmpfs: [/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U gateway]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+  redis:
+    image: redis:7-alpine
+    ports: ['127.0.0.1:${TEST_REDIS_PORT}:6379']
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+  idp:
+    build:
+      context: .
+      target: test-idp
+    environment:
+      TEST_IDP_URL: ${TEST_IDP_URL}
+      TEST_TLS_KEY: /certs/key.pem
+    ports: ['127.0.0.1:${TEST_IDP_PORT}:9443']
+    volumes: ['${TEST_CERT_DIR}:/certs:ro']

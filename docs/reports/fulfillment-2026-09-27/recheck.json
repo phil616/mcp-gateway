@@ -1,0 +1,88 @@
+{
+  "claude-west": {
+    "checks": {
+      "agent_completed": true,
+      "merchant_correct": true,
+      "clock_correct": true,
+      "policy_correct": true,
+      "exact_escalations": true,
+      "exact_skips": true,
+      "elapsed_hours_correct": true,
+      "case_ids_verified": true,
+      "upstream_isolation": true,
+      "agent_used_reads": true,
+      "agent_created_expected_drafts": true,
+      "no_rejected_draft_attempts": true,
+      "no_credential_leak": true,
+      "only_expected_mcp_calls": true,
+      "no_builtin_bypass": true
+    },
+    "passed": true,
+    "upstream_calls": 8
+  },
+  "claude-east": {
+    "checks": {
+      "agent_completed": true,
+      "merchant_correct": true,
+      "clock_correct": true,
+      "policy_correct": true,
+      "exact_escalations": true,
+      "exact_skips": true,
+      "elapsed_hours_correct": true,
+      "case_ids_verified": true,
+      "upstream_isolation": true,
+      "agent_used_reads": true,
+      "agent_created_expected_drafts": true,
+      "no_rejected_draft_attempts": true,
+      "no_credential_leak": true,
+      "only_expected_mcp_calls": true,
+      "no_builtin_bypass": true,
+      "recovered_transient_failure": true
+    },
+    "passed": true,
+    "upstream_calls": 10
+  },
+  "codex-west": {
+    "checks": {
+      "agent_completed": true,
+      "merchant_correct": true,
+      "clock_correct": true,
+      "policy_correct": true,
+      "exact_escalations": true,
+      "exact_skips": true,
+      "elapsed_hours_correct": true,
+      "case_ids_verified": true,
+      "upstream_isolation": true,
+      "agent_used_reads": true,
+      "agent_created_expected_drafts": true,
+      "no_rejected_draft_attempts": true,
+      "no_credential_leak": true,
+      "only_expected_mcp_calls": true,
+      "no_builtin_bypass": true
+    },
+    "passed": true,
+    "upstream_calls": 8
+  },
+  "codex-east": {
+    "checks": {
+      "agent_completed": true,
+      "merchant_correct": true,
+      "clock_correct": true,
+      "policy_correct": true,
+      "exact_escalations": true,
+      "exact_skips": true,
+      "elapsed_hours_correct": true,
+      "case_ids_verified": true,
+      "upstream_isolation": true,
+      "agent_used_reads": true,
+      "agent_created_expected_drafts": true,
+      "no_rejected_draft_attempts": true,
+      "no_credential_leak": true,
+      "only_expected_mcp_calls": true,
+      "no_builtin_bypass": true,
+      "recovered_transient_failure": true
+    },
+    "passed": true,
+    "upstream_calls": 9
+  }
+}

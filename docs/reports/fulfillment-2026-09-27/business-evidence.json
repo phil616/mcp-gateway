@@ -1,0 +1,318 @@
+{
+  "events": [
+    {
+      "merchant": "west",
+      "group": "claude-west",
+      "call_id": "00a0c833-a51d-4088-98fd-83e521facec5",
+      "action": "policy",
+      "order_id": null
+    },
+    {
+      "merchant": "west",
+      "group": "claude-west",
+      "call_id": "359e93f1-4c1d-468d-864c-855642ba42af",
+      "action": "orders",
+      "order_id": null
+    },
+    {
+      "merchant": "east",
+      "group": "claude-east",
+      "call_id": "a91d0b23-303c-4334-83d2-81f5cafbffad",
+      "action": "policy",
+      "order_id": null
+    },
+    {
+      "merchant": "east",
+      "group": "claude-east",
+      "call_id": "5cac4b87-719b-4110-9c0a-13081ff25b0a",
+      "action": "orders",
+      "order_id": null
+    },
+    {
+      "merchant": "east",
+      "group": "claude-east",
+      "call_id": "36f47eae-8d9d-4031-816b-2c4a09fae912",
+      "action": "tracking",
+      "order_id": "ORD-101",
+      "status": 503
+    },
+    {
+      "merchant": "east",
+      "group": "claude-east",
+      "call_id": "8f7415c3-f01a-4ea1-888c-3847738fd9c4",
+      "action": "tracking",
+      "order_id": "ORD-102",
+      "status": 200
+    },
+    {
+      "merchant": "west",
+      "group": "claude-west",
+      "call_id": "fe010c23-bf9b-4a46-83f0-8e3e1c3d2bb9",
+      "action": "tracking",
+      "order_id": "ORD-101",
+      "status": 200
+    },
+    {
+      "merchant": "east",
+      "group": "claude-east",
+      "call_id": "5e106b18-6a6f-47f5-ad7b-8f85e6c8f601",
+      "action": "tracking",
+      "order_id": "ORD-103",
+      "status": 200
+    },
+    {
+      "merchant": "west",
+      "group": "claude-west",
+      "call_id": "6f8ae7bd-d098-4a15-b2d7-d6a5dc977691",
+      "action": "tracking",
+      "order_id": "ORD-102",
+      "status": 200
+    },
+    {
+      "merchant": "east",
+      "group": "claude-east",
+      "call_id": "f8b8f98b-fb68-463a-b55a-531841bd31e0",
+      "action": "tracking",
+      "order_id": "ORD-104",
+      "status": 200
+    },
+    {
+      "merchant": "west",
+      "group": "claude-west",
+      "call_id": "62c46a2a-22b2-498c-865d-7caeb3540649",
+      "action": "tracking",
+      "order_id": "ORD-103",
+      "status": 200
+    },
+    {
+      "merchant": "west",
+      "group": "claude-west",
+      "call_id": "fdd594bc-19c5-418c-9488-07fcf0a9ccf7",
+      "action": "tracking",
+      "order_id": "ORD-104",
+      "status": 200
+    },
+    {
+      "merchant": "east",
+      "group": "claude-east",
+      "call_id": "325b5c05-f0e9-4d47-a59b-2e7d9cdbe573",
+      "action": "tracking",
+      "order_id": "ORD-105",
+      "status": 200
+    },
+    {
+      "merchant": "east",
+      "group": "claude-east",
+      "call_id": "0563f608-f8c7-4b49-a0a7-fe58255272e1",
+      "action": "tracking",
+      "order_id": "ORD-101",
+      "status": 200
+    },
+    {
+      "merchant": "west",
+      "group": "claude-west",
+      "call_id": "9aa79b29-4ed1-4a27-9232-8ea74e874f8c",
+      "action": "draft",
+      "order_id": "ORD-102",
+      "status": 200,
+      "created": true
+    },
+    {
+      "merchant": "west",
+      "group": "claude-west",
+      "call_id": "2b37559e-3db0-49ad-9e96-7873644f82b2",
+      "action": "draft",
+      "order_id": "ORD-104",
+      "status": 200,
+      "created": true
+    },
+    {
+      "merchant": "east",
+      "group": "claude-east",
+      "call_id": "2b5a0d62-bf4b-435b-9c3a-8d2088099ff4",
+      "action": "draft",
+      "order_id": "ORD-101",
+      "status": 200,
+      "created": true
+    },
+    {
+      "merchant": "east",
+      "group": "claude-east",
+      "call_id": "c447723c-bfa8-468b-984d-9390a93c4d0f",
+      "action": "draft",
+      "order_id": "ORD-104",
+      "status": 200,
+      "created": true
+    },
+    {
+      "merchant": "east",
+      "group": "codex-east",
+      "call_id": "da3c0e0e-35fc-4155-838e-0bb8c1adfcb9",
+      "action": "policy",
+      "order_id": null
+    },
+    {
+      "merchant": "east",
+      "group": "codex-east",
+      "call_id": "07750d83-a0c6-4c54-b812-051db37d71de",
+      "action": "orders",
+      "order_id": null
+    },
+    {
+      "merchant": "west",
+      "group": "codex-west",
+      "call_id": "20c8e5fd-884d-4502-8d0f-d652349002cb",
+      "action": "orders",
+      "order_id": null
+    },
+    {
+      "merchant": "west",
+      "group": "codex-west",
+      "call_id": "b28b7229-3642-4ed2-9aab-28d3619e3362",
+      "action": "policy",
+      "order_id": null
+    },
+    {
+      "merchant": "west",
+      "group": "codex-west",
+      "call_id": "d3b8d4fa-8b21-494b-89c9-381d3797e400",
+      "action": "tracking",
+      "order_id": "ORD-101",
+      "status": 200
+    },
+    {
+      "merchant": "west",
+      "group": "codex-west",
+      "call_id": "eccd1857-0ce0-46db-bfa3-52b2d15017d3",
+      "action": "tracking",
+      "order_id": "ORD-102",
+      "status": 200
+    },
+    {
+      "merchant": "west",
+      "group": "codex-west",
+      "call_id": "cd92358f-3991-47c5-8f13-9035ba06a8b5",
+      "action": "tracking",
+      "order_id": "ORD-103",
+      "status": 200
+    },
+    {
+      "merchant": "west",
+      "group": "codex-west",
+      "call_id": "2700e702-1fc7-4506-a057-f007496a91da",
+      "action": "tracking",
+      "order_id": "ORD-104",
+      "status": 200
+    },
+    {
+      "merchant": "east",
+      "group": "codex-east",
+      "call_id": "9498beda-82ff-4fd0-93ba-e2aca2b347e1",
+      "action": "tracking",
+      "order_id": "ORD-101",
+      "status": 503
+    },
+    {
+      "merchant": "east",
+      "group": "codex-east",
+      "call_id": "0b980a4d-34a9-4e47-8b2e-f923bb135ddb",
+      "action": "tracking",
+      "order_id": "ORD-102",
+      "status": 200
+    },
+    {
+      "merchant": "east",
+      "group": "codex-east",
+      "call_id": "5377639e-9359-4e63-ac32-1931964c28f8",
+      "action": "tracking",
+      "order_id": "ORD-103",
+      "status": 200
+    },
+    {
+      "merchant": "east",
+      "group": "codex-east",
+      "call_id": "7c44838d-1f3d-4a60-a85f-e2b6f270aeda",
+      "action": "tracking",
+      "order_id": "ORD-104",
+      "status": 200
+    },
+    {
+      "merchant": "east",
+      "group": "codex-east",
+      "call_id": "e3307534-010c-473a-869d-99e8de05c72a",
+      "action": "tracking",
+      "order_id": "ORD-101",
+      "status": 200
+    },
+    {
+      "merchant": "west",
+      "group": "codex-west",
+      "call_id": "6ec2837b-1f4f-49fe-804a-4200de38bff3",
+      "action": "draft",
+      "order_id": "ORD-102",
+      "status": 200,
+      "created": false
+    },
+    {
+      "merchant": "west",
+      "group": "codex-west",
+      "call_id": "704ba640-9472-4a18-8849-2df2bf6b91d7",
+      "action": "draft",
+      "order_id": "ORD-104",
+      "status": 200,
+      "created": false
+    },
+    {
+      "merchant": "east",
+      "group": "codex-east",
+      "call_id": "636e1d20-71cd-402a-bba3-b6ec70127f69",
+      "action": "draft",
+      "order_id": "ORD-101",
+      "status": 200,
+      "created": false
+    },
+    {
+      "merchant": "east",
+      "group": "codex-east",
+      "call_id": "3d9b4813-a2be-483b-b203-6af903b43034",
+      "action": "draft",
+      "order_id": "ORD-104",
+      "status": 200,
+      "created": false
+    }
+  ],
+  "cases": {
+    "west:ORD-102": {
+      "case_id": "CASE-WEST-ORD-102",
+      "merchant": "west",
+      "order_id": "ORD-102",
+      "status": "draft",
+      "reason": "Shipment in exception with last update older than 72 hours."
+    },
+    "west:ORD-104": {
+      "case_id": "CASE-WEST-ORD-104",
+      "merchant": "west",
+      "order_id": "ORD-104",
+      "status": "draft",
+      "reason": "Shipment in_transit with last update older than 72 hours."
+    },
+    "east:ORD-101": {
+      "case_id": "CASE-EAST-ORD-101",
+      "merchant": "east",
+      "order_id": "ORD-101",
+      "status": "draft",
+      "reason": "shipment in_transit and last update 72 hours old, exceeding 48-hour threshold"
+    },
+    "east:ORD-104": {
+      "case_id": "CASE-EAST-ORD-104",
+      "merchant": "east",
+      "order_id": "ORD-104",
+      "status": "draft",
+      "reason": "shipment exception and last update 96 hours old, exceeding 48-hour threshold"
+    }
+  },
+  "transient_failures": [
+    "claude-east",
+    "codex-east"
+  ]
+}

@@ -1,0 +1,198 @@
+@layer theme, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  background: #f5f7fb;
+  color: #172033;
+}
+.brand {
+  padding: 28px 24px 24px;
+  color: #233b80;
+  white-space: nowrap;
+  font-size: 19px;
+  font-weight: 650;
+}
+.header {
+  background: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 32px;
+  border-bottom: 1px solid #e7ebf2;
+}
+.content {
+  padding: 32px;
+  max-width: 1500px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.page-heading h2 {
+  margin: 0 0 8px;
+}
+.login {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+}
+.json {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.7;
+}
+.schema-field {
+  border: 1px solid #e7ebf2;
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.field-control {
+  margin-top: 10px;
+}
+@media (max-width: 700px) {
+  .content {
+    padding: 16px;
+  }
+  .header {
+    padding: 0 16px;
+  }
+  .brand {
+    font-size: 14px;
+    padding: 24px 6px;
+  }
+}
+
+/* Tailwind utilities only: Ant Design owns component resets and design tokens. */
+
+.sidebar {
+  border-right: 1px solid #e6eaf1;
+}
+.sidebar .ant-menu {
+  border-inline-end: 0 !important;
+  padding: 4px 10px;
+}
+.brand small {
+  display: block;
+  color: #737e94;
+  font-size: 12px;
+  font-weight: 400;
+  margin-top: 8px;
+}
+.sidebar-note {
+  margin: 28px 22px;
+  padding: 16px;
+  background: #f3f6fd;
+  border-radius: 10px;
+  color: #66728d;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.main-layout {
+  min-width: 0;
+}
+.header {
+  gap: 12px;
+}
+.content {
+  margin: 0 auto;
+}
+.resource-help {
+  margin-bottom: 20px;
+  background: #eef3ff;
+  border-color: #dae4fa;
+}
+.editor-help {
+  margin-bottom: 24px;
+}
+.endpoint-card {
+  margin-bottom: 28px;
+}
+.endpoint-url {
+  font-family: monospace;
+  font-size: 16px;
+  margin-top: 12px;
+  overflow-wrap: anywhere;
+}
+.code-block {
+  background: #f5f7fb;
+  padding: 16px;
+  border-radius: 8px;
+}
+.guide-hero {
+  padding: 28px;
+  border: 1px solid #dce5fb;
+  border-radius: 16px;
+  background: linear-gradient(120deg, #edf3ff, #fff);
+}
+.guide-hero h2 {
+  margin-top: 12px;
+}
+p {
+  line-height: 1.8;
+}
+.login {
+  padding: 24px;
+  box-sizing: border-box;
+  background: radial-gradient(ellipse at top, #e5edff, #f5f7fb 65%);
+}
+.login .ant-card {
+  max-width: 100%;
+  box-shadow: 0 12px 45px #23408012;
+}
+.page-heading {
+  gap: 16px;
+}
+.page-heading .ant-btn {
+  flex-shrink: 0;
+}
+@media (max-width: 700px) {
+  .header-guide,
+  .admin-name {
+    display: none;
+  }
+  .guide-hero {
+    padding: 20px;
+  }
+  .page-heading h2 {
+    font-size: 24px;
+  }
+  .ant-card .ant-card-body {
+    padding: 16px;
+  }
+  .ant-breadcrumb {
+    font-size: 12px;
+  }
+}
+
+.guide-page .ant-steps-item-wait .ant-steps-item-title,
+.guide-page .ant-steps-item-wait .ant-steps-item-content {
+  color: #536078;
+}
+.id-suggestions {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+.guide-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+}
+.guide-page [id] {
+  scroll-margin-top: 24px;
+}
+.guide-page li {
+  margin-bottom: 10px;
+}
+.guide-page .ant-steps {
+  margin-block: 16px;
+}

@@ -1,0 +1,94 @@
+ Network gateway-scenario-e2d72869_default Creating 
+ Network gateway-scenario-e2d72869_default Created 
+ Container gateway-scenario-e2d72869-redis-1 Creating 
+ Container gateway-scenario-e2d72869-postgres-1 Creating 
+ Container gateway-scenario-e2d72869-postgres-1 Created 
+ Container gateway-scenario-e2d72869-redis-1 Created 
+ Container gateway-scenario-e2d72869-postgres-1 Starting 
+ Container gateway-scenario-e2d72869-redis-1 Starting 
+ Container gateway-scenario-e2d72869-redis-1 Started 
+ Container gateway-scenario-e2d72869-postgres-1 Started 
+ Container gateway-scenario-e2d72869-redis-1 Waiting 
+ Container gateway-scenario-e2d72869-postgres-1 Waiting 
+ Container gateway-scenario-e2d72869-redis-1 Healthy 
+ Container gateway-scenario-e2d72869-postgres-1 Healthy 
+INFO:     Started server process [982244]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:38399 (Press CTRL+C to quit)
+OK: 5 tools; fingerprint=a7095dc129afa05628f140cb4932a51b723cbef894df72a427dc5e785558260b
+Synced 5 tools
+Administrator created
+INFO:     Uvicorn running on http://127.0.0.1:46025 (Press CTRL+C to quit)
+INFO:     Started parent process [983193]
+INFO:     Started server process [983196]
+INFO:     Waiting for application startup.
+INFO:     Started server process [983195]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Application startup complete.
+request=07100211-c60e-4205-bec2-1b441cf1e976 group=claude-west tool=shipping_policy elapsed_ms=10.2 status=ok
+request=7707ac14-93df-4b68-a736-3cad844de184 group=claude-west tool=find_orders elapsed_ms=10.9 status=ok
+request=fb3f676c-c6fd-48bf-a997-2d14d724e05f group=claude-east tool=shipping_policy elapsed_ms=8.9 status=ok
+request=add69076-cae3-4b26-80a4-4abc726dc11a group=claude-east tool=find_orders elapsed_ms=8.7 status=ok
+request=41b41e3d-a75a-4d52-a9a1-a88573e34428 group=claude-east tool=track_order elapsed_ms=12.1 status=error
+[09/27/26 01:39:43] Error calling tool 'track_order'                            
+request=a06a9f95-859d-497b-b0e4-8fc7e1d28396 group=claude-east tool=track_order elapsed_ms=11.8 status=ok
+request=94563747-b015-4b8c-aa33-8de96d52cef3 group=claude-west tool=track_order elapsed_ms=7.8 status=ok
+request=c436526e-f4a6-4e38-a16e-09911502ba23 group=claude-east tool=track_order elapsed_ms=9.3 status=ok
+request=98f7aba6-34ac-4a1d-b439-2fd13d0d3d26 group=claude-west tool=track_order elapsed_ms=8.5 status=ok
+request=d6aa34ad-e69d-4ab2-a2ff-e0831703833d group=claude-east tool=track_order elapsed_ms=9.2 status=ok
+request=dc90b67f-e624-4f61-80b1-1c02247114f9 group=claude-west tool=track_order elapsed_ms=11.0 status=ok
+request=e04bdda3-8cea-4498-89cb-6aa17d374618 group=claude-west tool=track_order elapsed_ms=15.9 status=ok
+request=2d639f5c-1675-48a0-b7bb-82b9be30abf8 group=claude-east tool=track_order elapsed_ms=8.6 status=ok
+request=6d312e73-5890-48bd-90bb-193f33aae7b8 group=claude-east tool=track_order elapsed_ms=7.8 status=ok
+request=476e4e9c-34ca-47b5-978e-118dd76e19ee group=claude-west tool=draft_escalation elapsed_ms=8.4 status=ok
+request=29f91587-264a-4d3e-ad68-a361a4bc40d1 group=claude-west tool=draft_escalation elapsed_ms=9.3 status=ok
+request=9ad686eb-f5f5-49ba-88dc-e67dc7461187 group=claude-east tool=draft_escalation elapsed_ms=7.5 status=ok
+request=3ff50934-9057-44dd-aa79-78b6ccb5b8a2 group=claude-east tool=draft_escalation elapsed_ms=8.1 status=ok
+request=d4bb2b3b-22e1-4b08-9da0-548b3d8564ad group=codex-east tool=shipping_policy elapsed_ms=9.2 status=ok
+request=78e8cc13-e5d4-4c9b-af57-ea3ad515fda4 group=codex-east tool=find_orders elapsed_ms=8.5 status=ok
+request=768e890f-7b12-4236-a9a0-eace492089b4 group=codex-west tool=find_orders elapsed_ms=8.0 status=ok
+request=0a4e15d0-ed89-4dca-9570-8fb48c8f41af group=codex-west tool=shipping_policy elapsed_ms=8.0 status=ok
+request=29ad12aa-c0dd-4380-a37c-a09a82cb526d group=codex-west tool=track_order elapsed_ms=7.5 status=ok
+request=c9369b40-8237-432b-85fe-f472e2d33b95 group=codex-west tool=track_order elapsed_ms=21.3 status=ok
+request=5f7bc116-2539-486c-8285-c454d66d6380 group=codex-west tool=track_order elapsed_ms=8.2 status=ok
+request=c4e54407-6bec-4f06-9bd4-2c39db33bbee group=codex-west tool=track_order elapsed_ms=8.2 status=ok
+request=363095fa-3923-45e2-8646-15a6a29fd449 group=codex-east tool=track_order elapsed_ms=7.3 status=error
+[09/27/26 01:39:57] Error calling tool 'track_order'                            
+request=8f329e34-5b1e-4b18-8c25-26e182a0953d group=codex-east tool=track_order elapsed_ms=10.3 status=ok
+request=c472f5dd-a3d0-4065-a312-b0ad3428e035 group=codex-east tool=track_order elapsed_ms=7.6 status=ok
+request=6d7e2023-a968-4ddd-a676-e8359de0d5bb group=codex-east tool=track_order elapsed_ms=6.9 status=ok
+request=76f8427d-a4af-4fcf-8e7c-6e195502fbf0 group=codex-east tool=track_order elapsed_ms=7.9 status=ok
+request=2314b993-3fd5-4c4c-b316-0ffe94b24425 group=codex-west tool=draft_escalation elapsed_ms=7.7 status=ok
+request=c4e700f1-19c8-429b-8f0b-c2da66e0854e group=codex-west tool=draft_escalation elapsed_ms=20.8 status=ok
+request=965903b8-a192-492e-b0ac-f52f797cdc9a group=codex-east tool=draft_escalation elapsed_ms=8.3 status=ok
+request=c8ee03ca-34f3-4fc9-8a30-a14e393261da group=codex-east tool=draft_escalation elapsed_ms=8.0 status=ok
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [982244]
+INFO:     Received SIGTERM, exiting.
+INFO:     Terminated child process [983195]
+INFO:     Terminated child process [983196]
+INFO:     Waiting for child process [983195]
+INFO:     Shutting down
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [983195]
+INFO:     Application shutdown complete.
+INFO:     Finished server process [983196]
+INFO:     Waiting for child process [983196]
+INFO:     Stopping parent process [983193]
+ Container gateway-scenario-e2d72869-redis-1 Stopping 
+ Container gateway-scenario-e2d72869-postgres-1 Stopping 
+ Container gateway-scenario-e2d72869-postgres-1 Stopped 
+ Container gateway-scenario-e2d72869-postgres-1 Removing 
+ Container gateway-scenario-e2d72869-postgres-1 Removed 
+ Container gateway-scenario-e2d72869-redis-1 Stopped 
+ Container gateway-scenario-e2d72869-redis-1 Removing 
+ Container gateway-scenario-e2d72869-redis-1 Removed 
+ Network gateway-scenario-e2d72869_default Removing 
+ Network gateway-scenario-e2d72869_default Removed 
