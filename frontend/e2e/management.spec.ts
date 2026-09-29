@@ -8,7 +8,7 @@ test("管理员在浏览器创建配置、绑定并通过真实 MCP 客户端调
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
-  await page.getByLabel("账号").fill("admin");
+  await page.getByLabel("用户名").fill("admin");
   await page.getByLabel("密码", { exact: true }).fill("test-password-1234");
   await page.getByRole("button", { name: /^登\s*录$/ }).click();
   await expect(
@@ -39,6 +39,7 @@ test("管理员在浏览器创建配置、绑定并通过真实 MCP 客户端调
   await newRecord("bindings");
   async function choose(label: string, value: string) {
     await page.getByLabel(label, { exact: true }).click();
+    await page.getByLabel(label, { exact: true }).fill(value);
     await page
       .locator(".ant-select-dropdown:visible")
       .locator(".ant-select-item-option-content")

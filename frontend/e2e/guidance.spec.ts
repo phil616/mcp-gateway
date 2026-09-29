@@ -104,7 +104,7 @@ test("会话请求网络错误不会被吞掉", async ({ page }) => {
   await page.route("**/api/v1/me", (route) => route.abort("failed"));
   await page.goto("/");
   await expect(page.getByText(/无法连接管理 API/)).toBeVisible();
-  await expect(page.getByLabel("账号")).toBeVisible();
+  await expect(page.getByLabel("用户名")).toBeVisible();
 });
 
 test("代理非 JSON 错误显示 HTTP 状态和请求编号", async ({ page }) => {

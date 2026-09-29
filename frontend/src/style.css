@@ -196,3 +196,7 @@ p {
 .guide-page .ant-steps {
   margin-block: 16px;
 }
+
+.dependency-table td {
+  overflow-wrap: anywhere;
+}

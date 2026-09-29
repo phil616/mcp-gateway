@@ -1,5 +1,4 @@
 import asyncio
-import hashlib
 import logging
 import time
 import traceback
@@ -9,6 +8,7 @@ from contextlib import asynccontextmanager
 import anyio
 import httpx
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastmcp import FastMCP
 from pydantic import BaseModel, Field
@@ -18,18 +18,14 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from starlette.routing import Route
 
-from .auth import admin, login
+from .auth import admin, login, session_key
 from .catalog import Catalog
+from .credentials import LoginBody
 from .http_errors import GatewayCORSMiddleware, console_origins, is_mcp_path, mcp_origins
 from .mcp import GroupDispatch, GroupProvider
 from .models import RESOURCES, AuditEvent, AuthProfile, Group
 from .service import Service, public
 from .settings import Settings
-
-
-class LoginBody(BaseModel):
-    username: str = Field(max_length=128)
-    password: str = Field(max_length=1024)
 
 
 class CreateBody(BaseModel):
@@ -38,7 +34,16 @@ class CreateBody(BaseModel):
 
 
 class BatchBindingsBody(BaseModel):
-    items: list[CreateBody] = Field(min_length=1, max_length=50)
+    items: list[CreateBody] = Field(min_length=1, max_length=200)
+
+
+class DeleteItem(BaseModel):
+    id: str
+    version: int = Field(ge=1)
+
+
+class BatchDeleteBody(BaseModel):
+    items: list[DeleteItem] = Field(min_length=1, max_length=200)
 
 
 class UpdateBody(BaseModel):
@@ -125,6 +130,8 @@ def create_app(settings=None):
                         "Vary": "Origin",
                     }
                 )
+        if request.url.path.startswith("/api/v1"):
+            response.headers["Cache-Control"] = "no-store"
         response.headers["X-Request-ID"] = request_id
         if response.status_code >= 400:
             log.warning(
@@ -137,6 +144,19 @@ def create_app(settings=None):
                 (time.monotonic() - start) * 1000,
             )
         return response
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_error(request, exc):
+        # Pydantic errors otherwise echo submitted passwords back to the client.
+        return JSONResponse(
+            status_code=422,
+            content={
+                "detail": [
+                    {"loc": error["loc"], "msg": error["msg"], "type": error["type"]}
+                    for error in exc.errors()
+                ]
+            },
+        )
 
     @app.exception_handler(IntegrityError)
     async def conflict(request, exc):
@@ -181,7 +201,7 @@ def create_app(settings=None):
     @app.post("/api/v1/logout")
     async def logout(request: Request, user=Depends(admin)):
         sid = request.cookies.get("gateway_session", "")
-        await app.state.redis.delete("session:" + hashlib.sha256(sid.encode()).hexdigest())
+        await app.state.redis.delete(session_key(sid))
         response = JSONResponse({"ok": True})
         response.delete_cookie(
             "gateway_session",
@@ -329,6 +349,27 @@ def create_app(settings=None):
                         },
                     ) from None
             return {"items": results}
+
+    @app.post("/api/v1/{resource}/batch-delete")
+    async def batch_delete(resource: str, body: BatchDeleteBody, user=Depends(admin)):
+        model_for(resource)
+        if resource == "tools":
+            raise HTTPException(422, "Tools cannot be deleted")
+        if len({item.id for item in body.items}) != len(body.items):
+            raise HTTPException(422, "Duplicate IDs in deletion batch")
+        async with app.state.sessions() as db, db.begin():
+            # Stable lock order avoids deadlocks between overlapping batches.
+            for item in sorted(body.items, key=lambda item: item.id):
+                try:
+                    await app.state.service.mutate(
+                        db, user["username"], resource, item.id, {}, item.version, delete=True
+                    )
+                except HTTPException as exc:
+                    raise HTTPException(
+                        exc.status_code,
+                        {"message": "整批未删除", "id": item.id, "reason": exc.detail},
+                    ) from None
+        return {"deleted": len(body.items)}
 
     @app.post("/api/v1/{resource}", status_code=201)
     async def create(resource: str, body: CreateBody, user=Depends(admin)):

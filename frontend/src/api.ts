@@ -1,8 +1,8 @@
 const configuredBase = (
-  import.meta.env.VITE_API_URL || "http://localhost:8000"
+  import.meta.env.VITE_API_URL || "/"
 ).replace(/\/$/, "");
 const loopback = new Set(["localhost", "127.0.0.1", "[::1]"]);
-const apiUrl = new URL(configuredBase, window.location.origin);
+const apiUrl = new URL(configuredBase || "/", window.location.origin);
 // Keep local development cookies on the same hostname as the console.
 if (
   apiUrl.protocol === "http:" &&
@@ -22,6 +22,7 @@ export class ApiError extends Error {
     super(requestId ? `${message}（请求编号：${requestId}）` : message);
   }
 }
+export const sessionExpiredEvent = "gateway:session-expired";
 let csrf = "";
 export function setCsrf(value: string) {
   csrf = value;
@@ -53,6 +54,10 @@ export async function api(path: string, method = "GET", body?: unknown) {
     );
   }
   if (!response.ok) {
+    if (response.status === 401 && path !== "/login") {
+      csrf = "";
+      window.dispatchEvent(new Event(sessionExpiredEvent));
+    }
     const detail = data?.detail;
     throw new ApiError(
       response.status === 409 && detail === "Version conflict"

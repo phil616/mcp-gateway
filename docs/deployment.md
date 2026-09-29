@@ -1,8 +1,58 @@
 # 部署与故障排查
 
-默认 Compose 提供 PostgreSQL、Redis、后端和独立 nginx 前端。迁移、目录同步是独立命令，按 README 顺序执行。PostgreSQL 和 Redis 默认不发布宿主机端口。
+默认 Compose 仅发布前端 nginx 的 `5173` 端口（可用 `GATEWAY_PORT` 修改），后端 `8000`、PostgreSQL 和 Redis 只在 Docker 内网访问。前端通过同源地址请求 API，nginx 转发 `/api/`、`/{group}/mcp`、`/.well-known/`、`/health/`、`/docs`、`/redoc` 和 `/openapi.json`；其他路径提供管理页面。迁移、目录同步仍是独立部署命令。
 
-生产建议分别配置 `mcp-console.example.com` 和 `mcp.example.com` 的 HTTPS 反向代理。`PUBLIC_URL` 设置后端公共 HTTPS origin；`CONSOLE_ORIGIN` 设置控制台精确 origin；`COOKIE_SECURE=true`。前端构建参数 `VITE_API_URL` 必须指向后端 URL。Cookie 为 HttpOnly、Secure、SameSite=None；所有管理写入验证 Origin 和 CSRF。真正跨站的第三方 Cookie 可能被浏览器阻止，优先使用同站点的不同子域。不要把 `.env` 打入镜像。
+## 单域名 HTTPS
+
+只使用 `https://mcp.example.com` 时，`.env` 配置：
+
+```dotenv
+PUBLIC_URL=https://mcp.example.com
+COOKIE_SECURE=true
+GATEWAY_PORT=5173
+# CONSOLE_ORIGIN 默认继承 PUBLIC_URL；已有旧值时删除或改成相同地址。
+```
+
+将域名的所有请求代理到 `http://127.0.0.1:5173`。以下适用于宿主机 nginx 或 host 网络 OpenResty，域名和证书路径需替换。桥接网络代理容器应使用可达的宿主机地址，或加入 Compose 网络后代理 `frontend:80`。
+
+```nginx
+server {
+    listen 80;
+    server_name mcp.example.com;
+    return 301 https://$host$request_uri;
+}
+server {
+    listen 443 ssl;
+    server_name mcp.example.com;
+    ssl_certificate /path/to/fullchain.pem;
+    ssl_certificate_key /path/to/privkey.pem;
+    location / {
+        proxy_pass http://127.0.0.1:5173;
+        proxy_http_version 1.1;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Connection "";
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+    }
+}
+```
+
+两层代理均关闭响应缓冲，保留 MCP 流式响应。不要改写请求路径、拦截 OPTIONS 或额外添加 CORS 响应头。管理页面为 `/`，API 文档为 `/docs`，MCP 地址为 `/{group}/mcp`。
+
+首次升级到统一入口时执行：
+
+```sh
+docker compose up -d --build --wait backend frontend
+curl -f http://localhost:5173/health/ready
+```
+
+以后只修改域名时，前端无需重新构建，执行 `docker compose up -d --force-recreate --wait backend` 更新后端环境变量。`PUBLIC_URL` 决定 MCP 端点和 OAuth resource URL，必须与外部访问地址一致。HTTPS 设置 `COOKIE_SECURE=true`；本地 HTTP 设置为 `false`。管理写入仍验证 Origin 和 CSRF。
+
+独立前端部署可在构建时设置 `VITE_API_URL` 并配置后端 `CONSOLE_ORIGIN`；默认 Compose 固定使用同源访问。不要把 `.env` 打入镜像。
 
 外部 PostgreSQL URI 必须是 `postgresql+asyncpg://...`。设置 DATABASE_URL/REDIS_URL 即可接入外部服务；Compose 的依赖服务可以仍运行，也可以直接使用构建后的后端镜像部署。数据库连接池为每 worker 独立实例，容量预算需乘 worker 数。
 

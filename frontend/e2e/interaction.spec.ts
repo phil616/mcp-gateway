@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test("推荐 ID、日历到期时间和批量绑定完整流程", async ({ page }) => {
   await page.goto("/groups");
-  await page.getByLabel("账号").fill("admin");
+  await page.getByLabel("用户名").fill("admin");
   await page.getByLabel("密码", { exact: true }).fill("test-password-1234");
   await page.getByRole("button", { name: /^登\s*录$/ }).click();
   await page.getByRole("button", { name: "创建", exact: true }).click();
@@ -14,11 +14,13 @@ test("推荐 ID、日历到期时间和批量绑定完整流程", async ({ page 
   await page.goto("/groups/" + group);
   await page.getByRole("button", { name: "批量绑定", exact: true }).click();
   await page.getByLabel("选择工具", { exact: true }).click();
-  for (const tool of ["demo.echo", "demo.wait"])
+  for (const tool of ["demo.echo", "demo.wait"]) {
+    await page.getByLabel("选择工具", { exact: true }).fill(tool);
     await page
       .locator(".ant-select-dropdown:visible .ant-select-item-option-content")
       .getByText(tool, { exact: true })
       .click();
+  }
   await page.getByText("批量创建工具绑定", { exact: true }).click();
   await expect(page.getByLabel("绑定 ID", { exact: true })).toHaveCount(2);
   await page.screenshot({
@@ -74,7 +76,7 @@ test("127.0.0.1 控制台可以登录并保留管理员会话", async ({ page, b
   const url = new URL(baseURL!);
   url.hostname = "127.0.0.1";
   await page.goto(url.href);
-  await page.getByLabel("账号").fill("admin");
+  await page.getByLabel("用户名").fill("admin");
   await page.getByLabel("密码", { exact: true }).fill("test-password-1234");
   await page.getByRole("button", { name: /^登\s*录$/ }).click();
   await expect(

@@ -28,6 +28,7 @@ import {
   InputNumber,
   Layout,
   Menu,
+  Modal,
   Breadcrumb,
   Collapse,
   Empty,
@@ -42,7 +43,7 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { api, ApiError, base, setCsrf } from "./api";
+import { api, ApiError, base, setCsrf, sessionExpiredEvent } from "./api";
 import zhCN from "antd/locale/zh_CN";
 import {
   ApiOutlined,
@@ -539,6 +540,7 @@ function BatchBindingEditor({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [prefix, setPrefix] = useState("");
   const qc = useQueryClient();
   const { message } = App.useApp();
   const groups = useRows("groups"),
@@ -551,6 +553,18 @@ function BatchBindingEditor({
   const queries = [groups, tools, bindings, profiles, secrets];
   const loading = queries.some((q) => q.isPending);
   const failed = queries.find((q) => q.error)?.error;
+  const boundIds = new Set(
+    (bindings.data || [])
+      .filter((b: Row) => b.group_id === groupId)
+      .map((b: Row) => b.tool_id),
+  );
+  const matchingIds = (tools.data || [])
+    .filter(
+      (t: Row) =>
+        t.available && !boundIds.has(t.id) && t.id.startsWith(prefix.trim()),
+    )
+    .map((t: Row) => t.id as string);
+  const combinedIds = Array.from(new Set([...selectedIds, ...matchingIds]));
   function selectTools(ids: string[]) {
     const previous: Row[] = form.getFieldValue("items") || [];
     const taken = (bindings.data || [])
@@ -635,7 +649,7 @@ function BatchBindingEditor({
         showIcon
         type="info"
         title="同一组一次绑定多个工具，全部成功才会保存"
-        description="每次最多 50 个。已绑定的工具不可重复选择；推荐的 ID 和暴露名称可以修改。默认保存为禁用草稿，启用时会严格校验每项配置。"
+        description="每次最多 200 个。已绑定的工具不可重复选择；推荐的 ID 和暴露名称可以修改。默认保存为禁用草稿，启用时会严格校验每项配置。"
         className="editor-help"
       />
       {failed && (
@@ -678,6 +692,37 @@ function BatchBindingEditor({
           />
         </Form.Item>
         <Form.Item
+          label="工具 ID 前缀"
+          htmlFor="tool-prefix"
+          extra="按开头精确匹配，例如 csa.；自动跳过已绑定或不可用工具。"
+        >
+          <Space.Compact style={{ width: "100%" }}>
+            <Input
+              id="tool-prefix"
+              value={prefix}
+              onChange={(e) => setPrefix(e.target.value)}
+              placeholder="例如 csa."
+              disabled={!groupId}
+            />
+            <Button
+              disabled={
+                !groupId ||
+                !prefix.trim() ||
+                !matchingIds.length ||
+                combinedIds.length > 200
+              }
+              onClick={() => selectTools(combinedIds)}
+            >
+              添加匹配工具（{prefix.trim() ? matchingIds.length : 0}）
+            </Button>
+          </Space.Compact>
+          {prefix.trim() && combinedIds.length > 200 && (
+            <Typography.Text type="danger">
+              合计超过 200 个，请缩小前缀范围后添加。
+            </Typography.Text>
+          )}
+        </Form.Item>
+        <Form.Item
           label="选择工具"
           htmlFor="batch-tools"
           extra="切换组前请清空工具选择；移除工具会丢弃该项尚未保存的配置。"
@@ -690,7 +735,8 @@ function BatchBindingEditor({
             optionFilterProp="label"
             value={selectedIds}
             disabled={!groupId || saving || loading || !!failed}
-            maxCount={50}
+            maxCount={200}
+            maxTagCount="responsive"
             placeholder="可搜索并多选工具"
             onChange={selectTools}
             options={(tools.data || []).map((r: Row) => ({
@@ -801,6 +847,131 @@ function BatchBindingEditor({
   );
 }
 
+function DeleteDialog({
+  resource,
+  rows,
+  close,
+  complete,
+}: {
+  resource: string;
+  rows: Row[];
+  close: () => void;
+  complete: () => Promise<void>;
+}) {
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const { message } = App.useApp();
+  const dependencies = useQuery({
+    queryKey: [
+      "delete-dependencies",
+      resource,
+      rows.map((r) => [r.id, r.version]),
+    ],
+    staleTime: 0,
+    queryFn: async () => {
+      const items: Row[] = [];
+      for (const row of rows) {
+        const result = await api(
+          `/${resource}/${encodeURIComponent(row.id)}/dependencies`,
+        );
+        items.push(...result.items.map((d: Row) => ({ ...d, owner: row.id })));
+      }
+      return items;
+    },
+  });
+  const blocked = !!dependencies.data?.length;
+  return (
+    <Modal
+      open
+      title={
+        blocked
+          ? "请先解除以下引用"
+          : `删除 ${rows.length} 项${resources[resource]}？`
+      }
+      width={850}
+      onCancel={() => {
+        if (!saving) close();
+      }}
+      closable={!saving}
+      maskClosable={!saving}
+      cancelButtonProps={{ disabled: saving }}
+      okText="确认删除"
+      okButtonProps={{
+        danger: true,
+        disabled: blocked || dependencies.isFetching || !!dependencies.error,
+      }}
+      confirmLoading={saving}
+      styles={{
+        body: { maxHeight: "65vh", overflow: "auto", overflowWrap: "anywhere" },
+      }}
+      onOk={async () => {
+        setSaving(true);
+        setError("");
+        try {
+          const result = await api(`/${resource}/batch-delete`, "POST", {
+            items: rows.map((r) => ({ id: r.id, version: r.version })),
+          });
+          message.success(`已删除 ${result.deleted} 项`);
+          await complete();
+        } catch (e) {
+          setError((e as Error).message);
+        } finally {
+          setSaving(false);
+        }
+      }}
+    >
+      <Alert
+        showIcon
+        type={blocked ? "warning" : "info"}
+        title={
+          blocked
+            ? `发现 ${dependencies.data!.length} 条引用，请先删除相关绑定或访问密钥，或修改引用配置。`
+            : "删除后无法恢复；任意一项失败时，整批均不删除。"
+        }
+      />
+      {(error || dependencies.error) && (
+        <Alert
+          type="error"
+          className="editor-help"
+          title={error || dependencies.error?.message}
+        />
+      )}
+      <Table
+        size="small"
+        loading={dependencies.isFetching}
+        rowKey={(r: Row) =>
+          blocked ? `${r.owner}:${r.resource}:${r.id}` : r.id
+        }
+        dataSource={blocked ? dependencies.data : rows}
+        columns={
+          blocked
+            ? [
+                { title: "待删除对象", dataIndex: "owner" },
+                {
+                  title: "引用类型",
+                  dataIndex: "resource",
+                  render: (v: string) => resources[v] || v,
+                },
+                { title: "引用 ID", dataIndex: "id" },
+              ]
+            : [
+                { title: "ID", dataIndex: "id" },
+                { title: "版本", dataIndex: "version", width: 80 },
+              ]
+        }
+        tableLayout="fixed"
+        className="dependency-table"
+        scroll={{ y: 300 }}
+        pagination={{
+          pageSize: 10,
+          showSizeChanger: false,
+          showTotal: (total) => `共 ${total} 项`,
+        }}
+      />
+    </Modal>
+  );
+}
+
 function ResourcePage({ forced, group }: { forced?: string; group?: string }) {
   const params = useParams();
   const resource = forced || params.resource || "groups";
@@ -818,15 +989,13 @@ function ResourcePage({ forced, group }: { forced?: string; group?: string }) {
         `/${resource}?offset=${(page - 1) * 20}&limit=20&q=${encodeURIComponent(search)}${group ? "&group_id=" + encodeURIComponent(group) : ""}`,
       ),
   });
-  async function remove(row: Row) {
-    try {
-      await api(`/${resource}/${row.id}?version=${row.version}`, "DELETE");
-      await qc.invalidateQueries();
-      message.success("已删除");
-    } catch (e) {
-      message.error((e as Error).message);
-    }
-  }
+  const [selectedRows, setSelectedRows] = useState<Row[]>([]);
+  const [deleting, setDeleting] = useState<Row[] | null>(null);
+  React.useEffect(() => {
+    setSelectedRows([]);
+    setDeleting(null);
+    setPage(1);
+  }, [resource, group, search]);
   const columns =
     resource === "audit"
       ? ["at", "actor", "action", "resource", "object_id"].map((k) => ({
@@ -895,32 +1064,7 @@ function ResourcePage({ forced, group }: { forced?: string; group?: string }) {
                   编辑
                 </Button>
                 {resource !== "tools" && (
-                  <Button
-                    size="small"
-                    danger
-                    onClick={async () => {
-                      try {
-                        const deps = await api(
-                          `/${resource}/${r.id}/dependencies`,
-                        );
-                        if (deps.items.length) {
-                          modal.info({
-                            title: "请先解除以下引用",
-                            content: (
-                              <pre>{JSON.stringify(deps.items, null, 2)}</pre>
-                            ),
-                          });
-                          return;
-                        }
-                        modal.confirm({
-                          title: `删除 ${r.id}？`,
-                          onOk: () => remove(r),
-                        });
-                      } catch (e) {
-                        message.error((e as Error).message);
-                      }
-                    }}
-                  >
+                  <Button size="small" danger onClick={() => setDeleting([r])}>
                     删除
                   </Button>
                 )}
@@ -1005,6 +1149,15 @@ function ResourcePage({ forced, group }: { forced?: string; group?: string }) {
           </Typography.Text>
         </div>
         <Space wrap>
+          {!["tools", "audit"].includes(resource) && (
+            <Button
+              danger
+              disabled={!selectedRows.length}
+              onClick={() => setDeleting(selectedRows)}
+            >
+              批量删除（{selectedRows.length}）
+            </Button>
+          )}
           {resource === "bindings" && (
             <Button onClick={() => setBatchOpen(true)}>批量绑定</Button>
           )}
@@ -1065,6 +1218,26 @@ function ResourcePage({ forced, group }: { forced?: string; group?: string }) {
             ),
           }}
           rowKey="id"
+          rowSelection={
+            !["tools", "audit"].includes(resource)
+              ? {
+                  selectedRowKeys: selectedRows.map((r) => r.id),
+                  preserveSelectedRowKeys: true,
+                  onChange: (_, rows) => {
+                    if (rows.length > 200) {
+                      message.warning("每次最多选择 200 项");
+                      return;
+                    }
+                    setSelectedRows(rows);
+                  },
+                  getCheckboxProps: (row: Row) => ({
+                    disabled:
+                      selectedRows.length >= 200 &&
+                      !selectedRows.some((r) => r.id === row.id),
+                  }),
+                }
+              : undefined
+          }
           loading={query.isLoading}
           dataSource={query.data?.items || []}
           columns={columns}
@@ -1079,6 +1252,19 @@ function ResourcePage({ forced, group }: { forced?: string; group?: string }) {
           }}
         />
       </Card>
+      {deleting && (
+        <DeleteDialog
+          resource={resource}
+          rows={deleting}
+          close={() => setDeleting(null)}
+          complete={async () => {
+            setDeleting(null);
+            setSelectedRows([]);
+            setPage(1);
+            await qc.invalidateQueries();
+          }}
+        />
+      )}
       {batchOpen && (
         <BatchBindingEditor group={group} close={() => setBatchOpen(false)} />
       )}
@@ -1268,6 +1454,7 @@ function GroupPage() {
 }
 
 function Console() {
+  const [submitting, setSubmitting] = useState(false);
   const [session, setSession] = useState<Row | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -1275,6 +1462,15 @@ function Console() {
   const screens = Grid.useBreakpoint();
   const nav = useNavigate();
   const location = useLocation();
+  React.useEffect(() => {
+    const expired = () => {
+      setSession(null);
+      setCsrf("");
+      queryClient.clear();
+    };
+    window.addEventListener(sessionExpiredEvent, expired);
+    return () => window.removeEventListener(sessionExpiredEvent, expired);
+  }, []);
   React.useEffect(() => {
     api("/me")
       .then((s) => {
@@ -1295,34 +1491,51 @@ function Console() {
           <Form
             layout="vertical"
             onFinish={async (values) => {
+              if (submitting) return;
+              setSubmitting(true);
+              setError("");
               try {
-                const s = await api("/login", "POST", values);
+                await api("/login", "POST", values);
+                // Verify that the browser accepted and sent the session cookie.
+                const s = await api("/me");
                 setCsrf(s.csrf);
                 setSession(s);
-                setError("");
               } catch (e) {
-                setError((e as Error).message);
+                setError(
+                  e instanceof ApiError &&
+                    e.status === 401 &&
+                    e.message.includes("Login required")
+                    ? "浏览器未保存或发送登录 Cookie。请检查 HTTPS、COOKIE_SECURE 及跨站 Cookie 设置。"
+                    : (e as Error).message,
+                );
+              } finally {
+                setSubmitting(false);
               }
             }}
           >
             <Form.Item
               name="username"
-              label="账号"
-              rules={[{ required: true }]}
+              label="用户名"
+              extra="区分大小写；邮箱形式的账号也按完整用户名匹配。"
+              rules={[{ required: true }, { max: 128 }]}
             >
-              <Input autoComplete="username" />
+              <Input autoComplete="username" maxLength={128} />
             </Form.Item>
             <Form.Item
               name="password"
               label="密码"
-              rules={[{ required: true }]}
+              rules={[{ required: true }, { max: 1024 }]}
             >
               <Input.Password autoComplete="current-password" />
             </Form.Item>
-            <Button type="primary" htmlType="submit" block>
+            <Button type="primary" htmlType="submit" block loading={submitting}>
               登录
             </Button>
           </Form>
+          <Typography.Paragraph type="secondary" style={{ marginTop: 16 }}>
+            管理员账号由部署人员使用 gateway admin-create 创建，无需邮箱验证。
+            忘记密码请联系部署人员重置。
+          </Typography.Paragraph>
         </Card>
       </div>
     );
@@ -1417,10 +1630,15 @@ function Console() {
             <span className="admin-name">{session.username}</span>
             <Button
               onClick={async () => {
-                await api("/logout", "POST");
-                setSession(null);
-                setCsrf("");
-                queryClient.clear();
+                try {
+                  await api("/logout", "POST");
+                  setSession(null);
+                  setCsrf("");
+                  queryClient.clear();
+                } catch (e) {
+                  if (!(e instanceof ApiError && e.status === 401))
+                    window.alert((e as Error).message);
+                }
               }}
             >
               退出

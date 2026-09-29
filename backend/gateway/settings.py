@@ -12,5 +12,5 @@ class Settings(BaseSettings):
     key_version: str = "1"
     plugins_path: str = "plugins"
     cookie_secure: bool = True
-    session_seconds: int = 28800
+    session_seconds: int = Field(default=28800, ge=1)
     thread_limit: int = Field(default=16, ge=1, le=128)

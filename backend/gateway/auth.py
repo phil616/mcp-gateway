@@ -1,4 +1,5 @@
 import hashlib
+import json
 import logging
 import secrets
 import time
@@ -7,7 +8,7 @@ from datetime import UTC, datetime
 import httpx
 import jwt
 from argon2 import PasswordHasher
-from argon2.exceptions import VerificationError
+from argon2.exceptions import InvalidHashError, VerificationError
 from fastapi import HTTPException, Request
 from sqlalchemy import select
 
@@ -18,25 +19,45 @@ passwords = PasswordHasher()
 DUMMY_HASH = passwords.hash("unused-random-login-timing-value")
 
 
+def session_key(sid):
+    return "session:" + hashlib.sha256(sid.encode()).hexdigest()
+
+
+def credential_version(password_hash):
+    return hashlib.sha256(password_hash.encode()).hexdigest()
+
+
 async def admin(request: Request):
     state = request.app.state
     sid = request.cookies.get("gateway_session", "")
-    value = (
-        await state.redis.get("session:" + hashlib.sha256(sid.encode()).hexdigest())
-        if sid
-        else None
-    )
+    value = await state.redis.get(session_key(sid)) if sid else None
     if not value:
         raise HTTPException(401, "Login required")
-    import json
-
-    session = json.loads(value)
+    try:
+        session = json.loads(value)
+        if not isinstance(session, dict) or not all(
+            isinstance(session.get(key), str) and session[key]
+            for key in ("username", "csrf", "credential_version")
+        ):
+            raise ValueError()
+    except (ValueError, TypeError):
+        await state.redis.delete(session_key(sid))
+        raise HTTPException(401, "Session expired; please sign in again") from None
+    async with state.sessions() as db:
+        user = await db.get(AdminUser, session["username"])
+    if not user or not secrets.compare_digest(
+        session["credential_version"].encode(), credential_version(user.password_hash).encode()
+    ):
+        await state.redis.delete(session_key(sid))
+        raise HTTPException(401, "Session expired; please sign in again")
     if request.method not in {"GET", "HEAD", "OPTIONS"}:
         if request.headers.get("origin") not in console_origins(
             state.settings
-        ) or not secrets.compare_digest(request.headers.get("x-csrf-token", ""), session["csrf"]):
+        ) or not secrets.compare_digest(
+            request.headers.get("x-csrf-token", "").encode(), session["csrf"].encode()
+        ):
             raise HTTPException(403, "CSRF validation failed")
-    return session
+    return {"username": session["username"], "csrf": session["csrf"]}
 
 
 async def login(request, username, password):
@@ -65,18 +86,23 @@ async def login(request, username, password):
         )
         if not user:
             raise HTTPException(401, "Invalid credentials")
-    except VerificationError:
+    except (VerificationError, InvalidHashError):
         raise HTTPException(401, "Invalid credentials") from None
-    import json
 
     sid, csrf = secrets.token_urlsafe(32), secrets.token_urlsafe(32)
     # Reauthentication invalidates the previous session.
     old = request.cookies.get("gateway_session")
     if old:
-        await state.redis.delete("session:" + hashlib.sha256(old.encode()).hexdigest())
+        await state.redis.delete(session_key(old))
     await state.redis.set(
-        "session:" + hashlib.sha256(sid.encode()).hexdigest(),
-        json.dumps({"username": username, "csrf": csrf}),
+        session_key(sid),
+        json.dumps(
+            {
+                "username": username,
+                "csrf": csrf,
+                "credential_version": credential_version(user.password_hash),
+            }
+        ),
         ex=state.settings.session_seconds,
     )
     return sid, csrf

@@ -2,6 +2,27 @@
 
 管理员登录、Agent 入站认证、工具出站凭据相互独立。管理员密码使用 Argon2id；随机会话存入 Redis，Cookie 仅发送到后端 `/api/v1`。会话有固定到期时间，退出立即删除。登录按直接连接的 IP 限制为每 5 分钟 10 次；反向代理须正确设置可信代理地址，不能无条件信任互联网传来的 forwarded headers。
 
+## 管理员创建、登录与恢复
+
+管理员仅通过部署环境的 CLI 创建，没有公开注册接口，也没有独立邮箱字段或邮箱验证码。
+
+```bash
+uv run gateway admin-create admin
+uv run gateway admin-reset-password admin
+```
+
+命令会交互式读取并确认密码。Docker 部署使用 `docker compose run --rm backend gateway admin-create admin`（重置时替换子命令）。创建、重置和服务必须连接同一个 `DATABASE_URL`，否则创建的账号不会出现在当前服务中。
+
+- 新用户名长度 1–128，不允许空白和不可打印字符；支持中文和邮箱形式，区分大小写。例如 `Admin@example.com` 与 `admin@example.com` 是不同账号。不会按邮箱格式验证、自动去空格或转小写。
+- 新建/重置密码长度 12–1024；密码中的空格保留。登录兼容已有短密码和旧用户名，最长密码同为 1024。
+- 重复创建返回明确错误，修改密码使用 `admin-reset-password`。旧版本创建的超长密码可通过此命令恢复。
+- 每次管理请求检查账号是否仍存在、密码版本是否一致；重置密码使该账号所有旧会话失效。重新登录使当前浏览器旧会话失效，退出立即删除会话。
+- 本次会话格式升级后，升级前已登录的用户需重新登录；无需数据库迁移。
+
+网页登录成功后会再调用 `/api/v1/me`，确认浏览器实际发送了 Cookie 才进入控制台。会话过期返回登录页并清除前端缓存；登录、会话和管理 API 响应禁止缓存。
+
+本地 HTTP 开发使用 `COOKIE_SECURE=false`；HTTPS 部署使用 `COOKIE_SECURE=true`。`CONSOLE_ORIGIN` 必须与浏览器来源匹配，`VITE_API_URL` 指向后端。如果 `/login` 返回成功而 `/me` 返回 401，检查 Cookie 是否被 Secure 属性、域名或浏览器跨站 Cookie 策略阻止。生产环境建议前后端同站部署。403 表示 Origin/CSRF 校验失败；429 表示同一来源 IP 在 5 分钟内超过 10 次登录请求（包括成功登录），应等待后重试。
+
 ## 组模式
 
 - public：不要求 Bearer；新组仍默认禁用，需要显式启用。

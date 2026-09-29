@@ -534,6 +534,53 @@
         }
       }
     },
+    "/api/v1/{resource}/batch-delete": {
+      "post": {
+        "summary": "Batch Delete",
+        "operationId": "batch_delete_api_v1__resource__batch_delete_post",
+        "parameters": [
+          {
+            "name": "resource",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Resource"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchDeleteBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/bindings/{id}/validate": {
       "post": {
         "summary": "Validate",
@@ -702,7 +749,7 @@
               "$ref": "#/components/schemas/CreateBody"
             },
             "type": "array",
-            "maxItems": 50,
+            "maxItems": 200,
             "minItems": 1,
             "title": "Items"
           }
@@ -712,6 +759,24 @@
           "items"
         ],
         "title": "BatchBindingsBody"
+      },
+      "BatchDeleteBody": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DeleteItem"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "minItems": 1,
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "BatchDeleteBody"
       },
       "CreateBody": {
         "properties": {
@@ -732,6 +797,25 @@
         ],
         "title": "CreateBody"
       },
+      "DeleteItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "version"
+        ],
+        "title": "DeleteItem"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -750,14 +834,17 @@
           "username": {
             "type": "string",
             "maxLength": 128,
+            "minLength": 1,
             "title": "Username"
           },
           "password": {
             "type": "string",
             "maxLength": 1024,
+            "minLength": 1,
             "title": "Password"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "username",

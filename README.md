@@ -24,7 +24,7 @@ docker compose up -d backend frontend
 
 管理端内置“入门指南”，说明工具、组、绑定和两类密钥的关系。界面与维护说明见 [前端指南](docs/frontend.md)。
 
-管理端：<http://localhost:5173>；API 文档：<http://localhost:8000/docs>。登录后：
+管理端：<http://localhost:5173>；API 文档：<http://localhost:5173/docs>。登录后：
 
 1. 创建密钥 `demo-key`。
 2. 创建配置集 `demo-config`，值为 `{"prefix":"Hello","api_key":{"$secret":"demo-key"}}`。
@@ -37,7 +37,7 @@ import asyncio
 from fastmcp import Client
 
 async def main():
-    async with Client("http://localhost:8000/user1/mcp") as client:
+    async with Client("http://localhost:5173/user1/mcp") as client:
         print(await client.list_tools())
         print((await client.call_tool("echo", {"message": "world"})).data)
 
@@ -58,6 +58,8 @@ uv run uvicorn gateway.app:create_app --factory --port 8000 --no-access-log
 npm --prefix frontend run dev
 ```
 
+默认 Compose 仅发布 `5173` 一个端口，前端 nginx 将 API、MCP、OAuth 元数据和健康检查转发到 Docker 内网后端。Vite 开发服务器也默认代理本地 `8000` 后端。单域名 HTTPS 配置见 [部署文档](docs/deployment.md)。
+
 前端独立部署时，在构建时设置 `VITE_API_URL`。后端只允许 `CONSOLE_ORIGIN` 的带 Cookie 管理请求。
 
 完整验收使用随机端口和独立 Compose 项目，创建临时 PostgreSQL、Redis、HTTPS 测试 IDP，启动两个后端 worker，并运行 Chromium 管理闭环；退出后销毁测试容器和数据，不使用当前 `.env` 的数据库。
@@ -70,6 +72,10 @@ npm --prefix frontend run build
 ```
 
 `uv run python tests/run.py tests/test_oauth.py` 可以只运行指定后端测试。测试 IDP 自动同意授权，仅供验收；生产镜像 `runtime` 不包含它。FastMCP 固定为 `4.0.10`，完整 Python 和前端依赖分别锁定在 `uv.lock`、`frontend/package-lock.json`。
+
+## CSA APIKey 工具
+
+已提供 61 个 CSA 用户 APIKey 工具（不暴露管理员或服务专用接口），默认访问 `https://api.altasci.com`；调用方每次提供 APIKey 和业务参数，管理员按需绑定到组。详见 [CSA 工具配置、调用与部署](docs/csa.md)。
 
 ## 真实智能体场景
 
