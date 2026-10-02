@@ -96,3 +96,5 @@ npm --prefix frontend run build
 详见 [插件契约](docs/plugins.md)、[管理 API](docs/api.md)、[认证兼容性](docs/auth.md)、[部署与故障排查](docs/deployment.md)。
 
 首版仅支持可信本地工具和 PostgreSQL；不包含远程 MCP 聚合、代码热加载、代码沙箱、resources/prompts、多租户管理权限、持久 MCP 会话或主动 `list_changed` 广播。
+
+网盘用户 API Key 工具接入、接口范围、上传下载与绑定配置见 [网盘 MCP 工具](docs/storage.md)。
