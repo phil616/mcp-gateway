@@ -52,7 +52,7 @@ def test_contract_is_fresh_and_covers_only_user_apikey_operations():
     subprocess.run(
         ["uv", "run", "python", "scripts/generate_csa.py", "--check"], cwd=ROOT, check=True
     )
-    source = json.loads((ROOT / "csa-docs/openapi.json").read_text())
+    source = json.loads((ROOT / "plugins/csa/docs/openapi.json").read_text())
     expected = {
         (method.upper(), path)
         for path, methods in source["paths"].items()

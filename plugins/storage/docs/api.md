@@ -97,7 +97,7 @@ const created = await fetch(`${API}/api/v1/projects`, {
 
 创建项目接受 `name`、`storage_backend_id`、可选 `description`。项目 PATCH 接受 name/description，name 必填；省略 description 会清空它，不支持更换 storage_backend_id。普通用户创建项目得到 write 成员权限，成员管理仍只允许管理员。
 
-文件名规则见[架构文档](architecture.md)：NFC、1–255 UTF-8 字节、禁止路径组件和控制字符。节点只能移到同项目目录，目录不能移入自己或后代；同级重名返回冲突。无效文件名当前由 repository 普通错误映射成 500 `INTERNAL`，不要假定所有参数错误都是 422。
+文件名规则见架构文档（上游引用 `architecture.md`，本仓库未收录）：NFC、1–255 UTF-8 字节、禁止路径组件和控制字符。节点只能移到同项目目录，目录不能移入自己或后代；同级重名返回冲突。无效文件名当前由 repository 普通错误映射成 500 `INTERNAL`，不要假定所有参数错误都是 422。
 
 ## 上传协议
 
@@ -191,7 +191,7 @@ Grant 仅保存在页面内存中。token 路径对应分享，grant 必须绑�
 
 ## 管理接口
 
-所有 `/admin/*` 路由要求管理员 Session，写操作要求 Origin/CSRF。完整字段见 OpenAPI；默认值和配置规则见[配置参考](configuration.md)。
+所有 `/admin/*` 路由要求管理员 Session，写操作要求 Origin/CSRF。完整字段见 OpenAPI；默认值和配置规则见配置参考（上游引用 `configuration.md`，本仓库未收录）。
 
 | 路径（省略 `/api/v1/admin`） | 方法与作用 |
 | --- | --- |

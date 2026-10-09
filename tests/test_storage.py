@@ -55,7 +55,7 @@ def test_reviewed_surface_and_fresh_contract():
     subprocess.run(
         ["uv", "run", "python", "scripts/generate_storage.py", "--check"], cwd=ROOT, check=True
     )
-    document = yaml.safe_load((ROOT / "storage-docs/openapi.yaml").read_bytes())
+    document = yaml.safe_load((ROOT / "plugins/storage/docs/openapi.yaml").read_bytes())
     expected = {
         (method.upper(), path)
         for path, methods in document["paths"].items()

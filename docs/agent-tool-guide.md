@@ -26,7 +26,7 @@
 - [`backend/gateway/contracts.py`](../backend/gateway/contracts.py)：管理写入字段。
 - [`docs/api.md`](api.md)：Cookie、CSRF、版本号和绑定 API。
 
-遵循仓库的 CodeGraph 使用约定。依赖版本以 `pyproject.toml` 和 `uv.lock` 为准；当前 SDK 基于 FastMCP 4.0.10。运行 `uv sync --frozen` 安装仓库锁定的环境。根项目已经包含 SDK，不必再在同一环境安装 `./sdk`。
+依赖版本以 `pyproject.toml` 和 `uv.lock` 为准；当前 SDK 基于 FastMCP 4.0.10。运行 `uv sync --frozen` 安装仓库锁定的环境。根项目已经包含 SDK，不必再在同一环境安装 `./sdk`。
 
 ## 3. 新建最小工具
 

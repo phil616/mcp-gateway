@@ -31938,47 +31938,47 @@ OIDC UserInfo
 
 以下为请求模型自定义校验器的代码说明与拒绝信息；触发条件见链接中的校验器。默认请求模型校验失败为 422，敏感路径例外见行为约定。
 
-- `AccessApiKeyCreate.validate_name`（[app/schemas/access_api_key.py:13](../app/schemas/access_api_key.py#L13)）：密钥名称不能为空
-- `AccessApiKeyUpdate.validate_value`（[app/schemas/access_api_key.py:26](../app/schemas/access_api_key.py#L26)）：字段不能为空
-- `BusinessAccountUpdateRequest.validate_non_empty`（[app/schemas/business_account.py:55](../app/schemas/business_account.py#L55)）：至少提供一个需要更新的字段
-- `BusinessAccountAdminUpdateRequest.validate_non_empty`（[app/schemas/business_account.py:75](../app/schemas/business_account.py#L75)）：至少提供一个需要更新的字段
-- 共享校验 `_validate_redirect_uris`（[app/schemas/oauth.py:132](../app/schemas/oauth.py#L132)）：redirect_uri 格式无效；redirect_uri 禁止凭据、片段或空主机；redirect_uri 必须使用 HTTPS；仅回环地址可使用 HTTP
-- 共享校验 `_validate_grant_types`（[app/schemas/oauth.py:148](../app/schemas/oauth.py#L148)）：包含不支持的 grant_type；refresh_token 必须与 authorization_code 配合使用
-- 共享校验 `_validate_scopes`（[app/schemas/oauth.py:158](../app/schemas/oauth.py#L158)）：scope 格式无效
-- `OAuthClientBase.validate_redirect_uris`（[app/schemas/oauth.py:21](../app/schemas/oauth.py#L21)）：调用上述共享校验函数，见源码条件
-- `OAuthClientBase.validate_grant_types`（[app/schemas/oauth.py:26](../app/schemas/oauth.py#L26)）：调用上述共享校验函数，见源码条件
-- `OAuthClientBase.validate_scopes`（[app/schemas/oauth.py:31](../app/schemas/oauth.py#L31)）：调用上述共享校验函数，见源码条件
-- `OAuthClientBase.validate_public_client`（[app/schemas/oauth.py:35](../app/schemas/oauth.py#L35)）：公共客户端不能使用 client_credentials
-- `OAuthClientUpdate.validate_redirect_uris`（[app/schemas/oauth.py:62](../app/schemas/oauth.py#L62)）：调用上述共享校验函数，见源码条件
-- `OAuthClientUpdate.validate_grant_types`（[app/schemas/oauth.py:67](../app/schemas/oauth.py#L67)）：调用上述共享校验函数，见源码条件
-- `OAuthClientUpdate.validate_scopes`（[app/schemas/oauth.py:72](../app/schemas/oauth.py#L72)）：调用上述共享校验函数，见源码条件
-- 共享校验 `_validate_http_url`（[app/schemas/project.py:10](../app/schemas/project.py#L10)）：URL 格式无效；URL 必须是绝对 HTTP(S) 地址；URL 不允许包含凭据
-- `ProjectUpdate.validate_non_empty`（[app/schemas/project.py:61](../app/schemas/project.py#L61)）：至少提供一个需要更新的字段
-- `ProjectFileCreate.validate_storage_key`（[app/schemas/project.py:136](../app/schemas/project.py#L136)）：必须提供 storage_key；storage_key 与兼容字段 oss_key 不一致
-- `ProjectFileUpdate.validate_non_empty`（[app/schemas/project.py:151](../app/schemas/project.py#L151)）：至少提供一个需要更新的字段
-- `ProjectLinkUpdate.validate_non_empty`（[app/schemas/project.py:229](../app/schemas/project.py#L229)）：至少提供一个需要更新的字段
-- `ProjectTaskUpdate.validate_non_empty`（[app/schemas/project.py:281](../app/schemas/project.py#L281)）：至少提供一个需要更新的字段
-- `ProjectFinanceEntryUpdate.validate_non_empty`（[app/schemas/project.py:343](../app/schemas/project.py#L343)）：至少提供一个需要更新的字段
-- `ResponsibleTagResponse.convert_object_id`（[app/schemas/responsible_tag.py:34](../app/schemas/responsible_tag.py#L34)）：调用上述共享校验函数，见源码条件
-- `CatalogData.unique_ids`（[app/schemas/shop.py:34](../app/schemas/shop.py#L34)）：必须包含定制版和畅销版；商品编号不能重复
-- `OAuthKeyImportRequest.validate_private_pem_envelope`（[app/schemas/system_key.py:29](../app/schemas/system_key.py#L29)）：必须提交 PKCS#8 PEM 私钥
-- `TotpConfirmRequest.validate_code`（[app/schemas/two_factor.py:38](../app/schemas/two_factor.py#L38)）：TOTP 验证码必须为 6 位数字
-- `UserRegister.validate_password`（[app/schemas/user.py:25](../app/schemas/user.py#L25)）：密码长度至少为8位；密码长度不能超过128位
-- `AdminChangePasswordRequest.validate_password`（[app/schemas/user.py:103](../app/schemas/user.py#L103)）：密码长度至少为8位；密码长度不能超过128位
-- `AdminResetPasswordRequest.validate_password`（[app/schemas/user.py:125](../app/schemas/user.py#L125)）：密码长度至少为8位；密码长度不能超过128位
-- `UserProfileUpdate.validate_non_empty`（[app/schemas/user.py:142](../app/schemas/user.py#L142)）：至少提供一个需要更新的字段
-- `UserPasswordChangeRequest.validate_new_password`（[app/schemas/user.py:156](../app/schemas/user.py#L156)）：新密码长度至少为8位；新密码长度不能超过128位
-- `ChangeEmailRequest.validate_verification_code`（[app/schemas/user.py:172](../app/schemas/user.py#L172)）：验证码必须为数字；验证码必须为6位
-- `CheckUserExistsRequest.validate_identifier`（[app/schemas/user.py:245](../app/schemas/user.py#L245)）：请输入有效的邮箱地址；请输入有效的11位手机号码
-- `AdminUserUpdateRequest.normalize_groups`（[app/schemas/user.py:281](../app/schemas/user.py#L281)）：单个用户组名称长度不能超过64位
-- `AdminUserUpdateRequest.validate_non_empty`（[app/schemas/user.py:297](../app/schemas/user.py#L297)）：至少提供一个需要更新的字段
-- `SendSMSCodeRequest.validate_phone_number`（[app/schemas/user.py:313](../app/schemas/user.py#L313)）：手机号码必须为数字；手机号码必须为11位；手机号码格式不正确
-- `SMSLoginRequest.validate_phone_number`（[app/schemas/user.py:338](../app/schemas/user.py#L338)）：手机号码必须为数字；手机号码必须为11位；手机号码格式不正确
-- `SMSLoginRequest.validate_verification_code`（[app/schemas/user.py:349](../app/schemas/user.py#L349)）：验证码必须为数字；验证码必须为6位
-- `ChangePhoneNumberRequest.validate_phone_number`（[app/schemas/user.py:365](../app/schemas/user.py#L365)）：手机号码必须为数字；手机号码必须为11位；手机号码格式不正确
-- `ChangePhoneNumberRequest.validate_verification_code`（[app/schemas/user.py:376](../app/schemas/user.py#L376)）：验证码必须为数字；验证码必须为6位
-- `SMSResetPasswordRequest.validate_phone_number`（[app/schemas/user.py:400](../app/schemas/user.py#L400)）：手机号码必须为数字；手机号码必须为11位；手机号码格式不正确
-- `SMSResetPasswordRequest.validate_verification_code`（[app/schemas/user.py:411](../app/schemas/user.py#L411)）：验证码必须为数字；验证码必须为6位
-- `SMSResetPasswordRequest.validate_new_password`（[app/schemas/user.py:420](../app/schemas/user.py#L420)）：新密码长度至少为8位；新密码长度不能超过128位
-- `EmailResetPasswordRequest.validate_verification_code`（[app/schemas/user.py:444](../app/schemas/user.py#L444)）：验证码必须为数字；验证码必须为6位
-- `EmailResetPasswordRequest.validate_new_password`（[app/schemas/user.py:453](../app/schemas/user.py#L453)）：新密码长度至少为8位；新密码长度不能超过128位
+- `AccessApiKeyCreate.validate_name`（app/schemas/access_api_key.py:13（上游引用 `../app/schemas/access_api_key.py#L13`，本仓库未收录））：密钥名称不能为空
+- `AccessApiKeyUpdate.validate_value`（app/schemas/access_api_key.py:26（上游引用 `../app/schemas/access_api_key.py#L26`，本仓库未收录））：字段不能为空
+- `BusinessAccountUpdateRequest.validate_non_empty`（app/schemas/business_account.py:55（上游引用 `../app/schemas/business_account.py#L55`，本仓库未收录））：至少提供一个需要更新的字段
+- `BusinessAccountAdminUpdateRequest.validate_non_empty`（app/schemas/business_account.py:75（上游引用 `../app/schemas/business_account.py#L75`，本仓库未收录））：至少提供一个需要更新的字段
+- 共享校验 `_validate_redirect_uris`（app/schemas/oauth.py:132（上游引用 `../app/schemas/oauth.py#L132`，本仓库未收录））：redirect_uri 格式无效；redirect_uri 禁止凭据、片段或空主机；redirect_uri 必须使用 HTTPS；仅回环地址可使用 HTTP
+- 共享校验 `_validate_grant_types`（app/schemas/oauth.py:148（上游引用 `../app/schemas/oauth.py#L148`，本仓库未收录））：包含不支持的 grant_type；refresh_token 必须与 authorization_code 配合使用
+- 共享校验 `_validate_scopes`（app/schemas/oauth.py:158（上游引用 `../app/schemas/oauth.py#L158`，本仓库未收录））：scope 格式无效
+- `OAuthClientBase.validate_redirect_uris`（app/schemas/oauth.py:21（上游引用 `../app/schemas/oauth.py#L21`，本仓库未收录））：调用上述共享校验函数，见源码条件
+- `OAuthClientBase.validate_grant_types`（app/schemas/oauth.py:26（上游引用 `../app/schemas/oauth.py#L26`，本仓库未收录））：调用上述共享校验函数，见源码条件
+- `OAuthClientBase.validate_scopes`（app/schemas/oauth.py:31（上游引用 `../app/schemas/oauth.py#L31`，本仓库未收录））：调用上述共享校验函数，见源码条件
+- `OAuthClientBase.validate_public_client`（app/schemas/oauth.py:35（上游引用 `../app/schemas/oauth.py#L35`，本仓库未收录））：公共客户端不能使用 client_credentials
+- `OAuthClientUpdate.validate_redirect_uris`（app/schemas/oauth.py:62（上游引用 `../app/schemas/oauth.py#L62`，本仓库未收录））：调用上述共享校验函数，见源码条件
+- `OAuthClientUpdate.validate_grant_types`（app/schemas/oauth.py:67（上游引用 `../app/schemas/oauth.py#L67`，本仓库未收录））：调用上述共享校验函数，见源码条件
+- `OAuthClientUpdate.validate_scopes`（app/schemas/oauth.py:72（上游引用 `../app/schemas/oauth.py#L72`，本仓库未收录））：调用上述共享校验函数，见源码条件
+- 共享校验 `_validate_http_url`（app/schemas/project.py:10（上游引用 `../app/schemas/project.py#L10`，本仓库未收录））：URL 格式无效；URL 必须是绝对 HTTP(S) 地址；URL 不允许包含凭据
+- `ProjectUpdate.validate_non_empty`（app/schemas/project.py:61（上游引用 `../app/schemas/project.py#L61`，本仓库未收录））：至少提供一个需要更新的字段
+- `ProjectFileCreate.validate_storage_key`（app/schemas/project.py:136（上游引用 `../app/schemas/project.py#L136`，本仓库未收录））：必须提供 storage_key；storage_key 与兼容字段 oss_key 不一致
+- `ProjectFileUpdate.validate_non_empty`（app/schemas/project.py:151（上游引用 `../app/schemas/project.py#L151`，本仓库未收录））：至少提供一个需要更新的字段
+- `ProjectLinkUpdate.validate_non_empty`（app/schemas/project.py:229（上游引用 `../app/schemas/project.py#L229`，本仓库未收录））：至少提供一个需要更新的字段
+- `ProjectTaskUpdate.validate_non_empty`（app/schemas/project.py:281（上游引用 `../app/schemas/project.py#L281`，本仓库未收录））：至少提供一个需要更新的字段
+- `ProjectFinanceEntryUpdate.validate_non_empty`（app/schemas/project.py:343（上游引用 `../app/schemas/project.py#L343`，本仓库未收录））：至少提供一个需要更新的字段
+- `ResponsibleTagResponse.convert_object_id`（app/schemas/responsible_tag.py:34（上游引用 `../app/schemas/responsible_tag.py#L34`，本仓库未收录））：调用上述共享校验函数，见源码条件
+- `CatalogData.unique_ids`（app/schemas/shop.py:34（上游引用 `../app/schemas/shop.py#L34`，本仓库未收录））：必须包含定制版和畅销版；商品编号不能重复
+- `OAuthKeyImportRequest.validate_private_pem_envelope`（app/schemas/system_key.py:29（上游引用 `../app/schemas/system_key.py#L29`，本仓库未收录））：必须提交 PKCS#8 PEM 私钥
+- `TotpConfirmRequest.validate_code`（app/schemas/two_factor.py:38（上游引用 `../app/schemas/two_factor.py#L38`，本仓库未收录））：TOTP 验证码必须为 6 位数字
+- `UserRegister.validate_password`（app/schemas/user.py:25（上游引用 `../app/schemas/user.py#L25`，本仓库未收录））：密码长度至少为8位；密码长度不能超过128位
+- `AdminChangePasswordRequest.validate_password`（app/schemas/user.py:103（上游引用 `../app/schemas/user.py#L103`，本仓库未收录））：密码长度至少为8位；密码长度不能超过128位
+- `AdminResetPasswordRequest.validate_password`（app/schemas/user.py:125（上游引用 `../app/schemas/user.py#L125`，本仓库未收录））：密码长度至少为8位；密码长度不能超过128位
+- `UserProfileUpdate.validate_non_empty`（app/schemas/user.py:142（上游引用 `../app/schemas/user.py#L142`，本仓库未收录））：至少提供一个需要更新的字段
+- `UserPasswordChangeRequest.validate_new_password`（app/schemas/user.py:156（上游引用 `../app/schemas/user.py#L156`，本仓库未收录））：新密码长度至少为8位；新密码长度不能超过128位
+- `ChangeEmailRequest.validate_verification_code`（app/schemas/user.py:172（上游引用 `../app/schemas/user.py#L172`，本仓库未收录））：验证码必须为数字；验证码必须为6位
+- `CheckUserExistsRequest.validate_identifier`（app/schemas/user.py:245（上游引用 `../app/schemas/user.py#L245`，本仓库未收录））：请输入有效的邮箱地址；请输入有效的11位手机号码
+- `AdminUserUpdateRequest.normalize_groups`（app/schemas/user.py:281（上游引用 `../app/schemas/user.py#L281`，本仓库未收录））：单个用户组名称长度不能超过64位
+- `AdminUserUpdateRequest.validate_non_empty`（app/schemas/user.py:297（上游引用 `../app/schemas/user.py#L297`，本仓库未收录））：至少提供一个需要更新的字段
+- `SendSMSCodeRequest.validate_phone_number`（app/schemas/user.py:313（上游引用 `../app/schemas/user.py#L313`，本仓库未收录））：手机号码必须为数字；手机号码必须为11位；手机号码格式不正确
+- `SMSLoginRequest.validate_phone_number`（app/schemas/user.py:338（上游引用 `../app/schemas/user.py#L338`，本仓库未收录））：手机号码必须为数字；手机号码必须为11位；手机号码格式不正确
+- `SMSLoginRequest.validate_verification_code`（app/schemas/user.py:349（上游引用 `../app/schemas/user.py#L349`，本仓库未收录））：验证码必须为数字；验证码必须为6位
+- `ChangePhoneNumberRequest.validate_phone_number`（app/schemas/user.py:365（上游引用 `../app/schemas/user.py#L365`，本仓库未收录））：手机号码必须为数字；手机号码必须为11位；手机号码格式不正确
+- `ChangePhoneNumberRequest.validate_verification_code`（app/schemas/user.py:376（上游引用 `../app/schemas/user.py#L376`，本仓库未收录））：验证码必须为数字；验证码必须为6位
+- `SMSResetPasswordRequest.validate_phone_number`（app/schemas/user.py:400（上游引用 `../app/schemas/user.py#L400`，本仓库未收录））：手机号码必须为数字；手机号码必须为11位；手机号码格式不正确
+- `SMSResetPasswordRequest.validate_verification_code`（app/schemas/user.py:411（上游引用 `../app/schemas/user.py#L411`，本仓库未收录））：验证码必须为数字；验证码必须为6位
+- `SMSResetPasswordRequest.validate_new_password`（app/schemas/user.py:420（上游引用 `../app/schemas/user.py#L420`，本仓库未收录））：新密码长度至少为8位；新密码长度不能超过128位
+- `EmailResetPasswordRequest.validate_verification_code`（app/schemas/user.py:444（上游引用 `../app/schemas/user.py#L444`，本仓库未收录））：验证码必须为数字；验证码必须为6位
+- `EmailResetPasswordRequest.validate_new_password`（app/schemas/user.py:453（上游引用 `../app/schemas/user.py#L453`，本仓库未收录））：新密码长度至少为8位；新密码长度不能超过128位

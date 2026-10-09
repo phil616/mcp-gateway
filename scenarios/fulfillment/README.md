@@ -82,4 +82,4 @@ uv run python -m pytest scenarios/fulfillment/test_evaluation.py -q
 
 不会保存完整模型内部推理流。测试用真实随机 Key 会在写入产物前替换为 `[REDACTED]`。JSON 中的业务订单、理由和工单号均为合成测试数据。
 
-首次实测报告及捕获证据：[2026-09-27 测试报告](../../docs/reports/fulfillment-2026-09-27/report.md)。
+首次实测报告及捕获证据：[2026-09-27 测试报告](reports/2026-09-27/report.md)。

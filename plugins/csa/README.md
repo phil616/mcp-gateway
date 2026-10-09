@@ -1,6 +1,8 @@
 # CSA APIKey MCP 工具
 
-插件 `plugins/csa/plugin.py` 将 `csa-docs/openapi.json` 中明确允许普通用户通过账号 APIKey 访问的 **61 个操作**注册为网关工具，默认上游地址为 `https://api.altasci.com`。每个接口都是独立工具，管理员可分别绑定、重命名、启停；未绑定的工具不会出现在组端点。无需修改网关路由或创建另一台 MCP 服务器。
+插件 `plugins/csa/plugin.py` 将 `plugins/csa/docs/openapi.json` 中明确允许普通用户通过账号 APIKey 访问的 **61 个操作**注册为网关工具，默认上游地址为 `https://api.altasci.com`。每个接口都是独立工具，管理员可分别绑定、重命名、启停；未绑定的工具不会出现在组端点。无需修改网关路由或创建另一台 MCP 服务器。
+
+本文属于第三方插件接入文档。命令从仓库根目录执行；上游资料见 [资料边界](docs/README.md)，网关通用能力见 [主体文档](../../docs/README.md)。
 
 ## 调用方式
 
@@ -11,7 +13,7 @@
 | CSA 账号 APIKey | 61 个用户工具；以账号权限和资源归属执行 |
 | 网关组访问 Key | 组使用 static 认证时，作为访问 `/{group}/mcp` 的 Bearer；与上述密钥独立 |
 
-这里按用户要求采用**调用方传入 APIKey**，是通常“管理员通过 `$secret` 注入上游密钥”模式的明确例外。配置 schema 仅有 `base_url`，默认值已设为实际服务地址；密钥不能写进配置集。
+本插件采用**调用方传入 APIKey**，是通常“管理员通过 `$secret` 注入上游密钥”模式的明确例外。配置 schema 仅有 `base_url`，默认值已设为实际服务地址；密钥不能写进配置集。
 
 ```python
 import asyncio
@@ -68,7 +70,7 @@ OpenAPI 已声明 `AccountAPIKey`，但部分旧 Markdown 仍只写 Bearer；本
 
 ## 部署与绑定
 
-工具清单可通过管理端目录或 `gateway plugins check` 查看；代码 ID 为 `csa.` 加上 OpenAPI operationId 的 `_api_` 前缀之前部分。例如：
+工具清单可通过管理端目录查看；`gateway plugins check` 只输出工具总数和指纹；代码 ID 为 `csa.` 加上 OpenAPI operationId 的 `_api_` 前缀之前部分。例如：
 
 | 代码 ID | API |
 | --- | --- |
@@ -79,7 +81,7 @@ OpenAPI 已声明 `AccountAPIKey`，但部分旧 Markdown 仍只写 Bearer；本
 | `csa.catalog` / `csa.preview_quote` / `csa.create_order` | 商城目录、报价、下单 |
 | `csa.my_commissions` | GET /api/agents/commissions |
 
-遵循[新增工具指南](agent-tool-guide.md)的整批发布流程，禁止新旧 worker 混用插件制品：
+遵循[新增工具指南](../../docs/agent-tool-guide.md)的整批发布流程，禁止新旧 worker 混用插件制品：
 
 ```sh
 uv sync --frozen
@@ -114,18 +116,18 @@ docker compose up -d --force-recreate backend
 }
 ```
 
-提交至 `POST /api/v1/bindings` 后，调用 `POST /api/v1/bindings/csa-list-tickets/validate`，按返回的实时 version 启用绑定及组。端点为 `https://你的网关/csa/mcp`。完整的组、认证、访问 Key 创建与版本更新示例见[新增工具指南第 6 节](agent-tool-guide.md#6-将工具绑定到组)。不要将 CSA APIKey 用作管理 API 登录凭据。
+提交至 `POST /api/v1/bindings` 后，调用 `POST /api/v1/bindings/csa-list-tickets/validate`，通过 GET 读取绑定和组的实时 version 后分别启用（validate 仅返回 valid）。端点为 `https://你的网关/csa/mcp`。完整的组、认证、访问 Key 创建与版本更新示例见[新增工具指南第 6 节](../../docs/agent-tool-guide.md#6-将工具绑定到组)。不要将 CSA APIKey 用作管理 API 登录凭据。
 
 需要更换上游时通过管理员 overrides 设置 `{"base_url":"https://另一个可信CSA地址"}`，仅接受 HTTPS 根地址；回环 HTTP 用于本地测试。调用方不能更改目标 URL 或认证头。
 
 ## 契约维护
 
 ```sh
-# csa-docs/openapi.json 更新后显式重新生成并审阅差异
+# plugins/csa/docs/openapi.json 更新后显式重新生成并审阅差异
 uv run python scripts/generate_csa.py
 uv run python scripts/generate_csa.py --check
 ```
 
-生成器仅选取明确支持 AccountAPIKey 且权限标记为普通登录用户的操作，并把 schema、说明、路径和成功状态编译到 `plugins/csa/contract.py`。运行时无须 `csa-docs`。生成文件为 Python，因此被网关现有制品指纹覆盖。更新后仍需 check、sync、全部 worker 重启；不会自动绑定新增工具到组。
+生成器仅选取明确支持 AccountAPIKey 且权限标记为普通登录用户的操作，并把 schema、说明、路径和成功状态编译到 `plugins/csa/contract.py`。运行时无须 `plugins/csa/docs`。生成文件为 Python，因此被网关现有制品指纹覆盖。更新后仍需 check、sync、全部 worker 重启；不会自动绑定新增工具到组。
 
 从旧版升级时，执行目录同步会将已移除的管理员/服务工具标记为 `available=false`，历史绑定保留但不可调用。必须按上述流程同步并重启全部 worker，生产环境才会应用此变更。

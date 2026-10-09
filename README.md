@@ -12,7 +12,7 @@ React 管理端 + FastAPI 管理 API + FastMCP 动态 Provider。开发者部署
 cp .env.example .env
 # 生成密钥，将输出填入 .env 的 MASTER_KEY（只需生成一次，务必备份）
 docker run --rm python:3.13-slim python -c 'import base64,secrets; print(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode())'
-docker compose build
+docker compose --profile setup build backend migrate sync frontend
 docker compose up -d --wait postgres redis
 # 独立部署步骤：不要让每个 worker 自动迁移或同步目录
 docker compose run --rm migrate
@@ -26,7 +26,7 @@ docker compose up -d backend frontend
 
 管理端：<http://localhost:5173>；API 文档：<http://localhost:5173/docs>。登录后：
 
-1. 创建密钥 `demo-key`。
+1. 创建上游密钥 `demo-key`，值可填本地演示字符串（该工具不访问上游）。
 2. 创建配置集 `demo-config`，值为 `{"prefix":"Hello","api_key":{"$secret":"demo-key"}}`。
 3. 创建组 `user1`，默认禁用。未指定认证配置时是公开模式。
 4. 创建绑定：组 `user1`、工具 `demo.echo`、暴露名称 `echo`、配置集 `demo-config`，启用绑定。
@@ -50,7 +50,9 @@ asyncio.run(main())
 uv sync --frozen
 npm --prefix frontend ci
 uv run gateway plugins check
-# .env 中设置实际可访问的 PostgreSQL、Redis 和 MASTER_KEY
+# 宿主机运行前设置 DATABASE_URL、REDIS_URL、MASTER_KEY
+# PUBLIC_URL=http://localhost:8000，CONSOLE_ORIGIN=http://localhost:5173
+# COOKIE_SECURE=false；Compose 的数据库/Redis 默认不映射宿主机端口
 uv run alembic upgrade head
 uv run gateway plugins sync
 uv run gateway admin-create admin
@@ -67,34 +69,31 @@ npm --prefix frontend run dev
 ```sh
 cd frontend && npx playwright install chromium && cd ..
 uv run python tests/run.py
-uv run ruff check backend sdk plugins tests migrations
+uv run ruff check backend sdk plugins tests migrations scripts
 npm --prefix frontend run build
 ```
 
 `uv run python tests/run.py tests/test_oauth.py` 可以只运行指定后端测试。测试 IDP 自动同意授权，仅供验收；生产镜像 `runtime` 不包含它。FastMCP 固定为 `4.0.10`，完整 Python 和前端依赖分别锁定在 `uv.lock`、`frontend/package-lock.json`。
 
-## CSA APIKey 工具
+## 文档与扩展
 
-已提供 61 个 CSA 用户 APIKey 工具（不暴露管理员或服务专用接口），默认访问 `https://api.altasci.com`；调用方每次提供 APIKey 和业务参数，管理员按需绑定到组。详见 [CSA 工具配置、调用与部署](docs/csa.md)。
+[网关文档入口](docs/README.md)提供架构、配置、管理 API、认证、插件 SDK、前端和验证指南。主体负责工具接入、分组、认证、配置和执行生命周期；业务接口由插件实现。
 
-## 真实智能体场景
+- [插件目录](plugins/README.md)：随仓库提供的示例、工具及第三方适配器，各自维护业务说明和上游契约。
+- [场景目录](scenarios/README.md)：独立业务演示、运行步骤及历史验收证据。
 
-已使用 Codex CLI 和 Claude Code 创建四个物流分诊智能体，让它们通过网关读取商户规则、检查订单并创建内部工单草稿。四个任务均完成，覆盖组隔离、故障重试和业务幂等性。模型调用真实运行，订单数据为测试数据。
+## 目录与能力边界
 
-- [运行场景](scenarios/fulfillment/README.md)
-- [实测报告与调用证据](docs/reports/fulfillment-2026-09-27/report.md)
+| 目录 | 职责 |
+| --- | --- |
+| `backend/gateway/` | 通用管理 API、认证、请求快照、动态 Provider、CLI |
+| `sdk/gateway_sdk/` | 插件契约；可独立打包，不依赖网关数据库或应用 |
+| `frontend/` | React 管理控制台 |
+| `migrations/` | PostgreSQL 迁移 |
+| `docs/` | 网关主体使用和维护文档、管理 API 快照 |
+| `plugins/` | 插件实现及各自文档，第三方业务不属于网关内建 API |
+| `scripts/` | 开发维护工具，包括插件契约生成器 |
+| `tests/` | 网关及插件测试，隔离验收入口为 `tests/run.py` |
+| `scenarios/` | 独立业务场景及其报告 |
 
-## 目录
-
-- `backend/gateway/`：管理、认证、请求快照、Provider、CLI。
-- `sdk/gateway_sdk/`：独立插件 SDK，可用 `uv pip install ./sdk` 安装。
-- `plugins/demo/plugin.py`：配置注入和同步工具示例。
-- `frontend/`：Ant Design、官方图标、Tailwind CSS、Router、TanStack Query 管理端。
-- `migrations/`：Alembic 数据库迁移。
-- `tests/`、`compose.test.yml`：真实协议、隔离、认证、并发和浏览器验收。
-
-详见 [插件契约](docs/plugins.md)、[管理 API](docs/api.md)、[认证兼容性](docs/auth.md)、[部署与故障排查](docs/deployment.md)。
-
-首版仅支持可信本地工具和 PostgreSQL；不包含远程 MCP 聚合、代码热加载、代码沙箱、resources/prompts、多租户管理权限、持久 MCP 会话或主动 `list_changed` 广播。
-
-网盘用户 API Key 工具接入、接口范围、上传下载与绑定配置见 [网盘 MCP 工具](docs/storage.md)。
+当前仅加载可信本地 Python 工具；不支持远程 MCP 服务器聚合、代码热加载、代码沙箱、resources/prompts、多租户管理权限、持久 MCP 会话或主动 `list_changed` 广播。组是工具和访问密钥的隔离单位，所有管理员拥有相同管理权限。

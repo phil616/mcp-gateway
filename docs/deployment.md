@@ -1,5 +1,7 @@
 # 部署与故障排查
 
+完整环境变量及宿主机/Compose 默认值差异见[配置参考](configuration.md)。
+
 默认 Compose 仅发布前端 nginx 的 `5173` 端口（可用 `GATEWAY_PORT` 修改），后端 `8000`、PostgreSQL 和 Redis 只在 Docker 内网访问。前端通过同源地址请求 API，nginx 转发 `/api/`、`/{group}/mcp`、`/.well-known/`、`/health/`、`/docs`、`/redoc` 和 `/openapi.json`；其他路径提供管理页面。迁移、目录同步仍是独立部署命令。
 
 ## 单域名 HTTPS
@@ -43,7 +45,7 @@ server {
 
 两层代理均关闭响应缓冲，保留 MCP 流式响应。不要改写请求路径、拦截 OPTIONS 或额外添加 CORS 响应头。管理页面为 `/`，API 文档为 `/docs`，MCP 地址为 `/{group}/mcp`。
 
-首次升级到统一入口时执行：
+仅更新代理或入口配置、且数据库与插件制品已经同步时执行（代码发布须使用下文整批流程）：
 
 ```sh
 docker compose up -d --build --wait backend frontend
@@ -68,7 +70,7 @@ uv run uvicorn gateway.app:create_app --factory --host 0.0.0.0 --port 8000 --wor
 gunicorn 'gateway.app:create_app()' -k uvicorn_worker.UvicornWorker -w 2 -b 0.0.0.0:8000
 ```
 
-Gunicorn 属于可选部署依赖；已验收的是两个 Uvicorn worker。MCP 为无状态 Streamable HTTP，初始化与调用可落在不同 worker，无需粘滞。每个请求以 PostgreSQL REPEATABLE READ 读取组、认证、绑定、工具和密钥快照；提交之后的新请求使用新配置，正在执行的调用继续使用旧副本。Redis 只保存管理员会话/登录限流，不缓存组权限。
+Gunicorn 属于可选部署依赖；仓库验收 runner 使用两个 Uvicorn worker。MCP 为无状态 Streamable HTTP，初始化与调用可落在不同 worker，无需粘滞。每个请求以 PostgreSQL REPEATABLE READ 读取组、认证、绑定、工具和密钥快照；提交之后的新请求使用新配置，正在执行的调用继续使用旧副本。Redis 只保存管理员会话/登录限流，不缓存组权限。
 
 FastAPI lifespan 管理 FastMCP lifespan、数据库连接池、Redis、HTTP 客户端和同步工具并发容量。健康检查 `/health/live` 不访问数据库；`/health/ready` 检查数据库、Redis和部署指纹。`THREAD_LIMIT` 默认为每 worker 16，工具超时包含容量排队时间。管理员密码验证使用独立的每 worker 4 个线程容量，不与同步工具争抢默认线程名额。同步线程超时后仍占用容量直到完成，不能强制撤销外部副作用。
 

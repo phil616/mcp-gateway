@@ -88,4 +88,4 @@
 - 系统密钥读取、生成、激活、校验、停用、删除、reconcile 需要管理员，**import-oauth 需要超级管理员**。初始化/生成/导入成功为 201，删除成功为 204；公钥导出返回 JSON 中 public_key_pem，不是 PEM 文件流。
 - 初始化仅允许尚无激活 OAuth 密钥的状态；激活、停用、删除受用途、校验、保留期约束。冲突为 409，材料校验错误为 400，其他系统密钥服务异常为 503。import-oauth 可通过 activate 请求立即激活。
 - 数据导出 catalog/documentation/download 三个操作都需要超级管理员。datasets 1–28 项，必须来自 catalog、不能重复，额外字段 422。documentation 返回 Markdown 附件；download 返回 application/json 附件。
-- 导出保留原始数据库字段（包括敏感认证材料的已存储形式），不是用户 API 的安全投影。data 为按集合名组织的 Canonical Extended JSON v2 原始文档数组；在线逐集合读取不是同一时间点快照。详情见 [字段说明](data-export-fields.md)。读取准备阶段失败为 503；客户端仍需检查完整 JSON 和 complete 标记，以识别传输中断。
+- 导出保留原始数据库字段（包括敏感认证材料的已存储形式），不是用户 API 的安全投影。data 为按集合名组织的 Canonical Extended JSON v2 原始文档数组；在线逐集合读取不是同一时间点快照。详情见 字段说明（上游引用 `data-export-fields.md`，本仓库未收录）。读取准备阶段失败为 503；客户端仍需检查完整 JSON 和 complete 标记，以识别传输中断。

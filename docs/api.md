@@ -1,6 +1,6 @@
 # 管理 API
 
-运行时 `/docs` 和 `/openapi.json` 是完整接口定义；`docs/openapi.json` 是提交版本的导出。所有管理数据接口要求管理员 Cookie；写入同时要求 `Origin: CONSOLE_ORIGIN` 和 `X-CSRF-Token`。`POST /api/v1/login` 接受 username/password，返回 username/csrf 并设置 HttpOnly Cookie。`GET /api/v1/me` 恢复页面会话；`POST /api/v1/logout` 删除 Redis 会话。
+运行时 `/docs` 和 `/openapi.json` 提供路由与请求外层结构；`docs/openapi.json` 是提交版本的导出。资源 data 的运行时字段约束见下文，通用路由不会为每类资源生成独立请求模型。所有管理数据接口要求管理员 Cookie；写入同时要求 `Origin: CONSOLE_ORIGIN` 和 `X-CSRF-Token`。`POST /api/v1/login` 接受 username/password，返回 username/csrf 并设置 HttpOnly Cookie。`GET /api/v1/me` 恢复页面会话；`POST /api/v1/logout` 删除 Redis 会话。
 
 ## 通用资源
 
@@ -46,3 +46,11 @@
 ## 批量删除
 
 `POST /api/v1/{resource}/batch-delete`，请求为 `{"items":[{"id":"example","version":1}]}`，一次 1–200 项，不允许重复 ID 或删除工具目录。成功返回 `{"deleted":1}`。整批使用同一事务，任何一项版本冲突或仍有引用时全部回滚（包含审计记录）。不级联删除引用对象，需先删除绑定、访问密钥或修改相关配置。
+
+## 响应与客户端更新流程
+
+资源对象包含 `id`、`version` 及展开的业务字段（不是嵌套在 `data` 内）；分页 `offset >= 0`、`1 <= limit <= 200`，默认 50。组详情额外返回 `auth_mode`、`effective_tools`、`client_example` 及分客户端的 `client_examples`。
+
+写入的 `data` 只包含需要修改的字段；PUT 不是整对象替换。先 GET 获取最新 version，再 PUT 或 DELETE，遇到 409 重新读取并确认改动。`POST /bindings/{id}/validate` 成功仅返回 `{"valid":true}`，不会启用绑定或返回 version。校验通过后仍需分别更新绑定与组。
+
+登录需要匹配的 Origin，成功后保存 Cookie 和响应 csrf；后续写入（包括退出）带 `X-CSRF-Token`。GET `/me` 可以恢复 username/csrf。错误的 detail 可能为字符串、字段错误数组或含 dependencies 的对象，不能假定始终是字符串；使用响应的 `X-Request-ID` 定位日志。

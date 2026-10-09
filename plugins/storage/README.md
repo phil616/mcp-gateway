@@ -1,6 +1,8 @@
 # 网盘用户 APIKey MCP 工具
 
-`plugins/storage/plugin.py` 将 `storage-docs/openapi.yaml` 中普通用户可通过 API Key 使用的 17 个操作注册为 `storage.*` 工具。调用方每次提供 `{api_key, request}`，插件只将该 Key 作为上游 `Authorization: Bearer ...` 发送，不保存、不使用共享凭据，也不透传网关入站 Bearer。
+`plugins/storage/plugin.py` 将 `plugins/storage/docs/openapi.yaml` 中普通用户可通过 API Key 使用的 17 个操作注册为 `storage.*` 工具。调用方每次提供 `{api_key, request}`，插件只将该 Key 作为上游 `Authorization: Bearer ...` 发送，不保存、不使用共享凭据，也不透传网关入站 Bearer。
+
+本文属于第三方插件接入文档。命令从仓库根目录执行；上游资料见 [资料边界](docs/README.md)，网关通用能力见 [主体文档](../../docs/README.md)。
 
 ## 接口范围
 
@@ -38,7 +40,7 @@
 }
 ```
 
-按[新增工具指南](agent-tool-guide.md#6-将工具绑定到组)校验并启用绑定与组。组 MCP 端点是 `https://你的网关/storage/mcp`。网关组访问 Key 与网盘 API Key 相互独立。
+按[新增工具指南](../../docs/agent-tool-guide.md#6-将工具绑定到组)校验并启用绑定与组。组 MCP 端点是 `https://你的网关/storage/mcp`。网关组访问 Key 与网盘 API Key 相互独立。
 
 调用 `storage_list_projects`：
 
@@ -83,8 +85,8 @@ uv sync --frozen
 uv run python scripts/generate_storage.py --check
 uv run gateway plugins check
 uv run ruff check backend sdk plugins tests migrations scripts
-uv run pytest -q tests/test_storage.py tests/test_csa.py
-uv run python tests/run.py tests/test_storage.py tests/test_storage_gateway.py tests/test_csa.py tests/test_csa_gateway.py
+uv run pytest -q tests/test_storage.py
+uv run python tests/run.py tests/test_storage.py tests/test_storage_gateway.py
 ```
 
 源文档更新后运行 `uv run python scripts/generate_storage.py`，审阅契约变化；新增接口需先核实普通用户权限，再更新生成器白名单。PyYAML 仅为开发依赖；运行时使用生成的 Python 契约，不读取 YAML 文档。

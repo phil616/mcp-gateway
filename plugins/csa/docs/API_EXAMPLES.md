@@ -207,4 +207,4 @@ curl --fail-with-body -X POST http://localhost:8000/api/admin/data-export \
   -o system-data-export.json
 ```
 
-The export uses MongoDB Canonical Extended JSON v2, not ordinary API response models. See [field documentation](data-export-fields.md). Replace every `<...>` placeholder before running examples; numeric placeholders must be unquoted JSON numbers.
+The export uses MongoDB Canonical Extended JSON v2, not ordinary API response models. See field documentation（上游引用 `data-export-fields.md`，本仓库未收录）. Replace every `<...>` placeholder before running examples; numeric placeholders must be unquoted JSON numbers.

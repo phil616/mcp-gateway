@@ -91,6 +91,6 @@ claude auth status
 uv run python scenarios/fulfillment/run.py
 ```
 
-详细准备、单客户端运行、目录结构和清理方式见 [场景 README](../../../scenarios/fulfillment/README.md)。这个场景可以保留为后续改动的人工触发验收，不应放进每次提交都自动消耗真实模型额度的默认测试套件。
+详细准备、单客户端运行、目录结构和清理方式见 [场景 README](../../README.md)。这个场景可以保留为后续改动的人工触发验收，不应放进每次提交都自动消耗真实模型额度的默认测试套件。
 
 客户端连接方式核对了 [OpenAI 官方 MCP 文档](https://learn.chatgpt.com/docs/extend/mcp?surface=cli)、[Codex 配置参考](https://learn.chatgpt.com/docs/config-file/config-reference) 和 [Claude Code CLI 参考](https://code.claude.com/docs/en/cli-reference)。实测结论来自本报告附带的本地执行证据，而非文档宣称。
